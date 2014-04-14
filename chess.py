@@ -1,4 +1,6 @@
-#!/usr/bin/python    
+#!/usr/bin/python 
+
+verbose = True 
 
 class Piece:
 
@@ -6,11 +8,13 @@ class Piece:
         self.id = id
         self.type = type
         self.team = team
-        self.pos = (x, y)
-        self.valid_moves = Piece.get_moves(self, type)
+        self.pos = [x, y]
+        self.valid_moves = Piece.get_valid_moves(self)
+        self.one_space_moves = Piece.get_one_space_moves(self)
         self.move_cnt = 0
+        self.taken = False
 
-    def get_moves(self, type):
+    def get_valid_moves(self):
 
         # valid moves for each type of piece:
         # (forward, sideways[+right/-left], <condition1>, ..., <conditionN>)
@@ -37,7 +41,7 @@ class Piece:
                      }
         move_dict['queen'] = move_dict['castle']+move_dict['bishop']
         
-        valid_moves = move_dict[type.lower()]
+        valid_moves = move_dict[self.type.lower()]
 
         # invert direction for blacks (as they will move down board)
         if self.team.lower() == 'black':
@@ -52,6 +56,15 @@ class Piece:
             
         return valid_moves
 
+    def get_one_space_moves(self):
+        # done here rather than when moving so that it is only done once per piece
+        one_space_moves = []
+        for move in self.valid_moves:
+            if min(move[:2]) >= -1 and max(move[:2]) <= 1:
+                one_space_moves.append(move)
+
+        return one_space_moves
+
     def move(self, forward, sideways):
 
         valid, invalid_reason = True, []
@@ -62,12 +75,7 @@ class Piece:
             print(str(forward) + ' steps forward and ' + str(sideways) + 
                   ' steps right is not a valid move for this piece')
 
-        # filter valid moves based on board boundaries
-        moves_allowed = []
-        for move in self.valid_moves:
-            new_x, new_ y = self.x + move[0], self.y + move[1]
-            if new_x in range(9) and new_y in range(9):
-                moves_allowed.append([new_x, new_y])
+        moves_allowed = get_moves_allowed(self)
 
         # check board boundaries
         if [forward, sideways] not in [move[:2] for move in moves_allowed]
@@ -75,13 +83,50 @@ class Piece:
             print(str(forward) + ' steps forward and ' + str(sideways) + 
                   ' steps right would move outside of the boards boundaries')
 
+    def get_moves_allowed(self):
+
+        if verbose: print('Getting all valid moves for ' + self.id + ' from: ' + str(self.pos))
+
+        # filter valid moves based on board boundaries
+        moves_allowed = []
+        for move in self.valid_moves:
+            new_y = self.y + move[0] # forward
+            new_x = self.x + move[1] # sideways
+            if new_x in range(9) and new_y in range(9):
+                moves_allowed.append([new_x, new_y])
+
+        if verbose: print(str(len(moves_allowed)) + ' moves possible within boundaries'
+
         # filter based on position of other pieces (blocking)
         occupied = []
         for id, piece in game.pieces.items():
-            occupied.append(piece.pos)
+            if id != self.id:
+                occupied.append(piece.pos)
+
+        for move in moves_allowed:
+            move_okay = True
+            steps = get_steps(self, moves_allowed, move[0], move[1])
 
         # check that all any condtions on the move are satisfied
 
+    def get_steps(self, moves_allowed, forward, sideways):
+
+        steps = []
+        for move in moves_allowed:
+            # exclude any that move more than one space
+            if move in self.one_space_moves:
+                # handle by type to deal with exceptions
+                if self.type != 'pawn' and self.type != 'knight':
+                    if forward and sideways: # this means anything other than zero in both
+                        # consider calcing vertical and horizontal distance before and after
+                        # move and only adding step if it gets closer?
+                        steps.append(move)
+                    elif forward:
+                        #...cond
+                        steps.append(move)
+                    elif sideways:
+                        #... cond
+                        steps.append(move)
 
 
 class Game:
