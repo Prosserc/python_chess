@@ -52,6 +52,37 @@ class Piece:
             
         return valid_moves
 
+    def move(self, forward, sideways):
+
+        valid, invalid_reason = True, []
+
+        # check valid moves for piece
+        if [forward, sideways] not in [move[:2] for move in self.valid_moves]:
+            invalid_reason.append('piece')
+            print(str(forward) + ' steps forward and ' + str(sideways) + 
+                  ' steps right is not a valid move for this piece')
+
+        # filter valid moves based on board boundaries
+        moves_allowed = []
+        for move in self.valid_moves:
+            new_x, new_ y = self.x + move[0], self.y + move[1]
+            if new_x in range(9) and new_y in range(9):
+                moves_allowed.append([new_x, new_y])
+
+        # check board boundaries
+        if [forward, sideways] not in [move[:2] for move in moves_allowed]
+            invalid_reason.append('boundaries')
+            print(str(forward) + ' steps forward and ' + str(sideways) + 
+                  ' steps right would move outside of the boards boundaries')
+
+        # filter based on position of other pieces (blocking)
+        occupied = []
+        for id, piece in game.pieces.items():
+            occupied.append(piece.pos)
+
+        # check that all any condtions on the move are satisfied
+
+
 
 class Game:
 
@@ -156,14 +187,19 @@ def main():
     print game.board.display
 
     # test pieces:
-    for id, piece in game.pieces.items():
-        print(id, piece.type, piece.team, piece.pos, piece.allowed_to_jump)
-        print('Valid moves:', piece.valid_moves)
+    #for id, piece in game.pieces.items():
+    #    print(id, piece.type, piece.team, piece.pos, piece.allowed_to_jump)
+    #    print('Valid moves:', piece.valid_moves)
 
+    ##############################################################
+    ## simulate moves (to be replaced with turns and player input)
+    ##############################################################
+
+    # a valid move...
+    game.pieces['wp1'].move(2, 0)
 
     # pause
     foo = raw_input('\nPress enter to quit')
-    
 
 if __name__ == '__main__':
     main()
@@ -177,6 +213,8 @@ if __name__ == '__main__':
 ##    - filter from there based on:
 ##      - their current position e.g. to allow for the boundaries of the display;
 ##      - other pieces current positions i.e. what would be blocked;
+##    - make process for user turns / instructions
+##    - write info to database (for future AI data)
 
 
 ##  Design:
