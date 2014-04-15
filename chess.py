@@ -1,14 +1,17 @@
 #!/usr/bin/python 
 
 verbose = True 
+pause_at_end = False
 
 class Piece:
 
-    def __init__(self, id, type, team, x, y):
+    def __init__(self, id, type, team, row, col):
         self.id = id
         self.type = type
         self.team = team
-        self.pos = [x, y]
+        self.row = row
+        self.col = col
+        self.pos = [row, col]
         self.valid_moves = Piece.get_valid_moves(self)
         self.one_space_moves = Piece.get_one_space_moves(self)
         self.move_cnt = 0
@@ -44,7 +47,7 @@ class Piece:
         valid_moves = move_dict[self.type.lower()]
 
         # invert direction for blacks (as they will move down board)
-        if self.team.lower() == 'black':
+        if self.team.lower() == 'white':
             for move in valid_moves:
                 move[0] = move[0] * -1
 
@@ -65,7 +68,7 @@ class Piece:
 
         return one_space_moves
 
-    def move(self, forward, sideways):
+    def move(self, forward, sideways, game):
 
         valid, invalid_reason = True, []
 
@@ -75,39 +78,50 @@ class Piece:
             print(str(forward) + ' steps forward and ' + str(sideways) + 
                   ' steps right is not a valid move for this piece')
 
-        moves_allowed = get_moves_allowed(self)
+        moves_allowed = Piece.get_moves_allowed(self, game)
 
         # check board boundaries
-        if [forward, sideways] not in [move[:2] for move in moves_allowed]
+        if self.row+forward not in range(1,9) or self.col+sideways not in range(1,9):
             invalid_reason.append('boundaries')
             print(str(forward) + ' steps forward and ' + str(sideways) + 
                   ' steps right would move outside of the boards boundaries')
 
-    def get_moves_allowed(self):
+    def get_moves_allowed(self, game):
 
-        if verbose: print('Getting all valid moves for ' + self.id + ' from: ' + str(self.pos))
+        if verbose: 
+            print('Getting valid moves for ' + self.id + ' from ' + str(self.pos))
 
         # filter valid moves based on board boundaries
         moves_allowed = []
         for move in self.valid_moves:
-            new_y = self.y + move[0] # forward
-            new_x = self.x + move[1] # sideways
-            if new_x in range(9) and new_y in range(9):
-                moves_allowed.append([new_x, new_y])
+            new_row = self.row + move[0] # forward
+            new_col = self.col + move[1] # sideways
+            if new_col in range(1,9) and new_row in range(1,9):
+                moves_allowed.append([new_row, new_col])
 
-        if verbose: print(str(len(moves_allowed)) + ' moves possible within boundaries'
+        if verbose: 
+            print(str(len(moves_allowed)) + ' moves possible within boundaries')
 
-        # filter based on position of other pieces (blocking)
+        # get list of occupied cells
         occupied = []
         for id, piece in game.pieces.items():
             if id != self.id:
                 occupied.append(piece.pos)
 
-        for move in moves_allowed:
-            move_okay = True
-            steps = get_steps(self, moves_allowed, move[0], move[1])
+        # filter based on position of other pieces (blocking)
+        if not self.allowed_to_jump:
+            for move in moves_allowed[:]:
+                move_okay = True
+                steps = Piece.get_steps(self, moves_allowed, move[0], move[1])
+                # go through each step, if in occupied list (and not final step)
+                # then move is blocked, set move_okay to False, exit loop and
+                # remove move from moves_allowed
+            if not move_okay:
+                moves_allowed.remove(move)
 
-        # check that all any condtions on the move are satisfied
+        # check that any conditions on the move are satisfied
+
+        return moves_allowed
 
     def get_steps(self, moves_allowed, forward, sideways):
 
@@ -115,50 +129,119 @@ class Piece:
         for move in moves_allowed:
             # exclude any that move more than one space
             if move in self.one_space_moves:
-                # handle by type to deal with exceptions
-                if self.type != 'pawn' and self.type != 'knight':
-                    if forward and sideways: # this means anything other than zero in both
-                        # consider calcing vertical and horizontal distance before and after
-                        # move and only adding step if it gets closer?
-                        steps.append(move)
-                    elif forward:
-                        #...cond
-                        steps.append(move)
-                    elif sideways:
-                        #... cond
-                        steps.append(move)
+                if abs(forward) > abs(sideways):
+                    pass#???
+                elif abs(forward) == abs(sideways):
+                    pass#???
+                else:
+                    pass#???
+                # # handle by type to deal with exceptions
+                # if self.type != 'pawn': #???
+                #     if forward and sideways: # this means anything other than zero in
+                #         # both consider calcing vertical and horizontal distance before
+                #         # and after move and only adding step if it gets closer?
+                #         steps.append(move)
+                #     elif forward:
+                #         #...cond
+                #         steps.append(move)
+                #     elif sideways:
+                #         #... cond
+                #         steps.append(move)
+
+        return steps
+
+
+class Board:
+
+    def __init__(self, positions):
+        self.positions = positions
+        self.display = Board.draw_board(self)
+
+    def move_peice(self, piece):
+        # to follow...
+        pass
+
+    def draw_board(self):
+
+        rows = cols = range(9)
+        row_height, col_width, head_width = 4, 9, 6
+        width = (len(cols[1:]) * col_width) + head_width + 1 # allows for boarders
+        lines = range((len(rows) * row_height)+1)
+
+        display = ""
+        for i in lines:
+            row = (i/4) # cell down (0-8)
+            sep = "|" if row > 0 else " "
+
+            # if at row boundary...
+            if i%row_height == 0:
+                # if last row or frst row after headings
+                if i == max(lines) or row == 1:
+                    line = " "*head_width + "-"*(width-head_width)
+                # if first row
+                elif row == 0:
+                    line = None
+                else:
+                    line = " " * head_width + sep
+                    for col in cols[1:]:
+                        line = line + "-"*(col_width-1) + sep
+
+            # if line where a pieces could go
+            elif i%row_height == 2:
+                line = "  " + self.positions[row][0][0] + "   " + sep
+                for col in cols[1:]:
+                    if self.positions[row][col]:
+                        piece = self.positions[row][col][:2]
+                        pad1 = " "*(((col_width-1)/2)-1)
+                        pad2 = " "*((col_width-(len(pad1)+len(piece)))-1)
+                        line = line + pad1 + piece + pad2 + sep
+                    else:
+                        line = line + " "*(col_width-1) + sep
+
+            # normal row
+            else:
+                line = " "* head_width + sep
+                for col in cols[1:]:
+                    line = line + " "*(col_width-1) + sep
+
+            if line:
+                display = display + line + "\n"
+
+        return display
 
 
 class Game:
 
     def __init__(self):
-        # exact order TBC..., blanks to avoid zero indexing
-        #                     may come in handy for some sort of row / col totals
-        start_pos = [[[]    , []   , []   , []   , []   , []   , []   , []   , []    ],
-                     [[]    , 'bc1', 'bk1', 'bb1', 'bK' , 'bQ' , 'bb2', 'bk2', 'bc2' ],
-                     [[]    , 'bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8' ],
-                     [[]    , False, False, False, False, False, False, False, False ],
-                     [[]    , False, False, False, False, False, False, False, False ],
-                     [[]    , False, False, False, False, False, False, False, False ],
-                     [[]    , False, False, False, False, False, False, False, False ],
-                     [[]    , 'wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8' ],
-                     [[]    , 'wc1', 'wk1', 'wb1', 'wK' , 'wQ' , 'wb2', 'wk2', 'wc2' ]]
+        # exact order TBC...
+        start_pos = [[' ', 'A'  , 'B'  , 'C'  , 'D'  , 'E'  , 'F'  , 'G'  , 'H'   ],
+                     ['1', 'bc1', 'bk1', 'bb1', 'bK' , 'bQ' , 'bb2', 'bk2', 'bc2' ],
+                     ['2', 'bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8' ],
+                     ['3', False, False, False, False, False, False, False, False ],
+                     ['4', False, False, False, False, False, False, False, False ],
+                     ['5', False, False, False, False, False, False, False, False ],
+                     ['6', False, False, False, False, False, False, False, False ],
+                     ['7', 'wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8' ],
+                     ['8', 'wc1', 'wk1', 'wb1', 'wK' , 'wQ' , 'wb2', 'wk2', 'wc2' ]]
                      
         self.board = Board(positions=start_pos)
         self.pieces = Game.create_pieces(self)
 
     def create_pieces(self):
         pieces = {}
-        for y, row in enumerate(self.board.positions):
-            for x, id in enumerate(row):
+        for row, row_content in enumerate(self.board.positions):
+            if row == 0: continue
+            for col, id in enumerate(row_content):
+                if col == 0: continue
                 if id: # not an empty list of False (no piece)
                     if id[0] == 'w':
                         team = 'white'
                     elif id[0] == 'b':
                         team = 'black'
                     else:
-                        raise('Could not identify team for item (' + \
-                              str(x) + ',' + str(y) + ') in start_pos, id:' + id)
+                        msg = 'Could not identify team for item (' + \
+                              str(col) + ',' + str(row) + ') in start_pos, id:' + id
+                        exit(msg)
 
                     if id[1] == 'K':
                         type = 'king'
@@ -174,56 +257,10 @@ class Game:
                         type = 'pawn'
                     else:
                         raise('Could not identify type for item (' + \
-                              str(x) + ',' + str(y) + ') in start_pos, id:' + id)                       
+                              str(col) + ',' + str(row) + ') in start_pos, id:' + id)                       
 
-                    pieces[id] = Piece(id, type, team, x, y)
+                    pieces[id] = Piece(id, type, team, row, col)
         return pieces
-
-
-class Board:
-
-    def __init__(self, positions):
-        self.positions = positions
-        self.display = Board.draw_board(self)
-
-    def move_peice(self, piece):
-        # to follow...
-        pass
-
-    def draw_board(self):
-
-        rows = cols = range(1,9)
-        row_height, col_width = 4, 9
-        length = (len(cols) * col_width) + 1 # allows for boarders
-        lines = range(1,(len(rows) * row_height) + 1)
-
-        # print empty chess board
-        display = "-" * length + "\n"
-        for i in lines:
-            y = (i/4)+1 # cell down (1-8)
-            if i == max(lines):
-                row = "-"*length
-            elif i%row_height == 0:
-                row = "|"
-                for x in cols:
-                    row = row + "-"*(col_width-1) + "|"
-            elif i%row_height == 2: # line where a pieces would go
-                row = "|"
-                for x in cols:
-                    if self.positions[y][x]:
-                        piece = self.positions[y][x][:2]
-                        pad1 = " "*(((col_width-1)/2)-1)
-                        pad2 = " "*((col_width-(len(pad1)+len(piece)))-1)
-                        row = row + pad1 + piece + pad2 + "|"
-                    else:
-                        row = row + " "*(col_width-1) + "|"
-                
-            else:
-                row = "|"
-                for x in cols:
-                    row = row + " "*(col_width-1) + "|"
-            display = display + row + "\n"
-        return display
 
 
 def main():
@@ -233,7 +270,7 @@ def main():
 
     # test pieces:
     #for id, piece in game.pieces.items():
-    #    print(id, piece.type, piece.team, piece.pos, piece.allowed_to_jump)
+    #    print(id, piece.type, piece.team, str(piece.pos))
     #    print('Valid moves:', piece.valid_moves)
 
     ##############################################################
@@ -241,10 +278,11 @@ def main():
     ##############################################################
 
     # a valid move...
-    game.pieces['wp1'].move(2, 0)
+    game.pieces['wp2'].move(-2, 0, game)
 
     # pause
-    foo = raw_input('\nPress enter to quit')
+    if pause_at_end:
+        foo = raw_input('\nPress enter to quit')
 
 if __name__ == '__main__':
     main()
@@ -269,3 +307,15 @@ if __name__ == '__main__':
 ##  Features:
 ##    - consider option to list legal moves for a piece
 ##    - help feature to list shortcuts / features etc.
+
+
+##  Performance:
+##    - load all possible moves for each player at the start of each turn so that
+##      they are already know by the time the player comes to move?
+##      - if doing this would need a keyboardinterupt exception e.g.
+##        http://stackoverflow.com/questions/7180914/pause-resume-a-python-script-in-middle
+##        to pick up cases when the user was ready to make their move before all 
+##        possible moves had been pre-loaded (then just get moves for the piece they
+##        select.)
+##    - consider concept of piece type so that each type on parses it's moves etc once?
+##    - move occupied list to get once per turn
