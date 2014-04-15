@@ -70,21 +70,19 @@ class Piece:
 
     def move(self, forward, sideways, game):
 
-        valid, invalid_reason = True, []
+        invalid_reasons = []
 
         # check valid moves for piece
         if [forward, sideways] not in [move[:2] for move in self.valid_moves]:
-            invalid_reason.append('piece')
+            invalid_reasons.append('piece')
             print(str(forward) + ' steps forward and ' + str(sideways) + 
                   ' steps right is not a valid move for this piece')
 
         moves_allowed = Piece.get_moves_allowed(self, game)
 
-        # check board boundaries
-        if self.row+forward not in range(1,9) or self.col+sideways not in range(1,9):
-            invalid_reason.append('boundaries')
-            print(str(forward) + ' steps forward and ' + str(sideways) + 
-                  ' steps right would move outside of the boards boundaries')
+        if [forward, sideways] in moves_allowed:
+            return True, None
+        return False, invalid_reasons
 
     def get_moves_allowed(self, game):
 
@@ -112,41 +110,55 @@ class Piece:
         if not self.allowed_to_jump:
             for move in moves_allowed[:]:
                 move_okay = True
-                steps = Piece.get_steps(self, moves_allowed, move[0], move[1])
-                # go through each step, if in occupied list (and not final step)
-                # then move is blocked, set move_okay to False, exit loop and
-                # remove move from moves_allowed
-            if not move_okay:
-                moves_allowed.remove(move)
+                steps = Piece.get_steps(self, move[0], move[1], moves_allowed)
+
+                # go through each step, if in occupied list to check if blocked
+                tmp_pos = self.pos
+                for step in steps:
+                    tmp_pos = [tmp_pos[0]+step[0], tmp_pos[1]+step[1]]
+                    if tmp_pos in occupied:
+                        move_okay = False
+                        break
+
+                if not move_okay:
+                    moves_allowed.remove(move)
 
         # check that any conditions on the move are satisfied
 
+
+        # check that move would not put your King in check
+
+
         return moves_allowed
 
-    def get_steps(self, moves_allowed, forward, sideways):
+    def get_steps(self, forward, sideways, moves_allowed):
+        """Return all intermediate steps required (i.e. not inlcuding final step)"""
+
+        # get shoretlist of single space moves allowed
+        for move in moves_allowed[:]:
+            if move not in self.one_space_moves:
+                moves_allowed.remove(move)
 
         steps = []
-        for move in moves_allowed:
-            # exclude any that move more than one space
-            if move in self.one_space_moves:
-                if abs(forward) > abs(sideways):
-                    pass#???
-                elif abs(forward) == abs(sideways):
-                    pass#???
-                else:
-                    pass#???
-                # # handle by type to deal with exceptions
-                # if self.type != 'pawn': #???
-                #     if forward and sideways: # this means anything other than zero in
-                #         # both consider calcing vertical and horizontal distance before
-                #         # and after move and only adding step if it gets closer?
-                #         steps.append(move)
-                #     elif forward:
-                #         #...cond
-                #         steps.append(move)
-                #     elif sideways:
-                #         #... cond
-                #         steps.append(move)
+
+        while abs(forward) > 1 or abs(sideways) > 1:
+            fwd = -1 if forward < 0 else 1
+            sdw = -1 if sideways < 0 else 1
+            if abs(forward) > abs(sideways) and [fwd, 0] in moves_allowed:
+                steps.append([fwd, 0])
+                forward += fwd
+            elif abs(forward) == abs(sideways) and [fwd, sdw] in moves_allowed:
+                steps.append([fwd, sdw])
+                forward += fwd
+                sideways += sdw
+            elif abs(forward) < abs(sideways) and [0, sdw] in moves_allowed:
+                steps.append([fwd, sdw])
+                forward += fwd                
+            else:
+                print("\nHmmm, not sure I should have ended up here. This means that I can " +
+                      "not move one step in the direction that I need to? Add more debug " +
+                      "messages to work out whats going on.")
+                raise Exception("No valid steps available.")
 
         return steps
 
