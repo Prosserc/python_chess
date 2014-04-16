@@ -71,6 +71,7 @@ class Piece:
     def move(self, forward, sideways, game):
 
         invalid_reasons = []
+        destination = [self.row+forward, self.col+sideways]
 
         # check valid moves for piece
         if [forward, sideways] not in [move[:2] for move in self.valid_moves]:
@@ -78,11 +79,17 @@ class Piece:
             print(str(forward) + ' steps forward and ' + str(sideways) + 
                   ' steps right is not a valid move for this piece')
 
-        moves_allowed = Piece.get_moves_allowed(self, game)
+        poss_cells = Piece.get_moves_allowed(self, game)
 
-        if [forward, sideways] in moves_allowed:
+        if verbose:
+            print('Possible destination cells identified: ' + 
+                  ', '.join([str(i) for i in poss_cells]))
+
+        if destination in poss_cells:
+            if verbose: print('M O V E   A L L O W E D   ! ! !')
             return True, None
-        return False, invalid_reasons
+        if verbose: print('M O V E   N O T   A L L O W E D   ! ! !')
+        return False, invalid_reasons # IN PROG... need to get reasons
 
     def get_moves_allowed(self, game):
 
@@ -90,15 +97,17 @@ class Piece:
             print('Getting valid moves for ' + self.id + ' from ' + str(self.pos))
 
         # filter valid moves based on board boundaries
-        moves_allowed = []
+        poss_cells = []
+        moves_remaining = []
         for move in self.valid_moves:
             new_row = self.row + move[0] # forward
             new_col = self.col + move[1] # sideways
             if new_col in range(1,9) and new_row in range(1,9):
-                moves_allowed.append([new_row, new_col])
+                poss_cells.append([new_row, new_col])
+                moves_remaining.append(move)
 
         if verbose: 
-            print(str(len(moves_allowed)) + ' moves possible within boundaries')
+            print(str(len(poss_cells)) + ' moves possible within boundaries')
 
         # get list of occupied cells
         occupied = []
@@ -106,11 +115,22 @@ class Piece:
             if id != self.id:
                 occupied.append(piece.pos)
 
+        if verbose:
+            print('The following cells are occupied: ' + 
+                  ', '.join([str(i) for i in occupied]))
+
         # filter based on position of other pieces (blocking)
         if not self.allowed_to_jump:
-            for move in moves_allowed[:]:
+            for cell in poss_cells[:]:
+                if verbose: 
+                    print('.checking move to: ' + str(cell) + '...')
                 move_okay = True
-                steps = Piece.get_steps(self, move[0], move[1], moves_allowed)
+                steps = Piece.get_steps(self, 
+                                        cell[0] - self.row, 
+                                        cell[1] - self.col, 
+                                        moves_remaining)
+                if verbose: 
+                    print('..steps found: ' + ', '.join([str(i) for i in steps]))
 
                 # go through each step, if in occupied list to check if blocked
                 tmp_pos = self.pos
@@ -121,7 +141,9 @@ class Piece:
                         break
 
                 if not move_okay:
-                    moves_allowed.remove(move)
+                    poss_cells.remove(cell)
+                    # R E V I E W . . .
+                    moves_remaining.remove([cell[0] - self.row, cell[1] - self.col]) #???
 
         # check that any conditions on the move are satisfied
 
@@ -129,36 +151,45 @@ class Piece:
         # check that move would not put your King in check
 
 
-        return moves_allowed
+        return poss_cells
 
-    def get_steps(self, forward, sideways, moves_allowed):
+    def get_steps(self, forward, sideways, moves_remaining):
         """Return all intermediate steps required (i.e. not inlcuding final step)"""
 
         # get shoretlist of single space moves allowed
-        for move in moves_allowed[:]:
+        for move in moves_remaining[:]:
             if move not in self.one_space_moves:
-                moves_allowed.remove(move)
+                moves_remaining.remove(move)
+
+        if verbose: 
+            print('..target overall move: ' + str([forward, sideways]))
+            print('..possible steps to be reviewed: ' + 
+                  ', '.join([str(i) for i in moves_remaining]))
 
         steps = []
 
         while abs(forward) > 1 or abs(sideways) > 1:
+            if verbose: print('...[forward, sideways] moves left: ' + 
+                              str([forward, sideways]))
             fwd = -1 if forward < 0 else 1
             sdw = -1 if sideways < 0 else 1
-            if abs(forward) > abs(sideways) and [fwd, 0] in moves_allowed:
+            if verbose: print('...[fwd, sdw] set to: ' + str([fwd, sdw]))
+            if abs(forward) > abs(sideways) and [fwd, 0] in moves_remaining:
                 steps.append([fwd, 0])
-                forward += fwd
-            elif abs(forward) == abs(sideways) and [fwd, sdw] in moves_allowed:
+                forward -= fwd
+            elif abs(forward) == abs(sideways) and [fwd, sdw] in moves_remaining:
                 steps.append([fwd, sdw])
-                forward += fwd
-                sideways += sdw
-            elif abs(forward) < abs(sideways) and [0, sdw] in moves_allowed:
+                forward -= fwd
+                sideways -= sdw
+            elif abs(forward) < abs(sideways) and [0, sdw] in moves_remaining:
                 steps.append([fwd, sdw])
-                forward += fwd                
+                forward -= fwd                
             else:
                 print("\nHmmm, not sure I should have ended up here. This means that I can " +
                       "not move one step in the direction that I need to? Add more debug " +
                       "messages to work out whats going on.")
                 raise Exception("No valid steps available.")
+            if verbose: print('...step added: ' + str([fwd, sdw]))
 
         return steps
 
@@ -290,7 +321,7 @@ def main():
     ##############################################################
 
     # a valid move...
-    game.pieces['wp2'].move(-2, 0, game)
+    game.pieces['wp1'].move(-2, 0, game)
 
     # pause
     if pause_at_end:
@@ -309,7 +340,16 @@ if __name__ == '__main__':
 ##      - their current position e.g. to allow for the boundaries of the display;
 ##      - other pieces current positions i.e. what would be blocked;
 ##    - make process for user turns / instructions
-##    - write info to database (for future AI data)
+##    - write info to database (for future AI data):
+##      - just get all raw data here (incl possible moves?):
+##        - feature engineering can then be done in batch to enrich data e.g.:
+##          - move preceding a take (on which side / by how many moves)
+##          - other performance metrics e.g. short, mid and long term prospects after 
+##            move, i.e. how overall position in game improved / declined over next 
+##            x, y, z moves and who eventually won.
+##          - move direction
+##          - piece value
+##          - some measure of the moves risk level?
 
 
 ##  Design:
@@ -331,3 +371,14 @@ if __name__ == '__main__':
 ##        select.)
 ##    - consider concept of piece type so that each type on parses it's moves etc once?
 ##    - move occupied list to get once per turn
+
+
+##  Strategy:
+##  maybe I should reconsider approach of calculating all moves allowed?
+##  - computationally expensive:
+##    - O = MSP (M = valid moves for piece; S = intermediate steps; P = occipied cells;)
+##      just for blocking checks
+##    - checking if a move puts king in check would also be huge as you would need to
+##      consider: 
+##      - all of the moves that may be made by each piece on other team (or shorten by
+##        checking just if the move from each piece to where King is is possible)
