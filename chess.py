@@ -119,31 +119,42 @@ class Piece:
             print('The following cells are occupied: ' + 
                   ', '.join([str(i) for i in occupied]))
 
-        # filter based on position of other pieces (blocking)
-        if not self.allowed_to_jump:
+        # filter based on position of other pieces (blocking) 
+        if not self.allowed_to_jump: # i.e. not a knight
             for cell in poss_cells[:]:
-                if verbose: 
-                    print('.checking move to: ' + str(cell) + '...')
-                move_okay = True
-                steps = Piece.get_steps(self, 
-                                        cell[0] - self.row, 
-                                        cell[1] - self.col, 
-                                        moves_remaining)
-                if verbose: 
-                    print('..steps found: ' + ', '.join([str(i) for i in steps]))
 
-                # go through each step, if in occupied list to check if blocked
-                tmp_pos = self.pos
-                for step in steps:
-                    tmp_pos = [tmp_pos[0]+step[0], tmp_pos[1]+step[1]]
-                    if tmp_pos in occupied:
-                        move_okay = False
-                        break
+                # only check if moving more than one space
+                if (cell[0] - self.row) > 1 or (cell[1] - self.col) > 1:
 
-                if not move_okay:
-                    poss_cells.remove(cell)
-                    # R E V I E W . . .
-                    moves_remaining.remove([cell[0] - self.row, cell[1] - self.col]) #???
+                    if verbose: 
+                        print('.checking move to: ' + str(cell) + '...')
+                    move_okay = True
+
+                    steps = Piece.get_steps(self, 
+                                            cell[0] - self.row, 
+                                            cell[1] - self.col, 
+                                            moves_remaining[:])
+                    if verbose: 
+                        print('..steps found: ' + ', '.join([str(i) for i in steps]))
+
+                    # go through each step, if in occupied list to check if blocked
+                    tmp_pos = self.pos
+                    for step in steps:
+                        tmp_pos = [tmp_pos[0]+step[0], tmp_pos[1]+step[1]]
+                        if tmp_pos in occupied:
+                            move_okay = False
+                            break
+
+                    if not move_okay:
+                        move = [cell[0] - self.row, cell[1] - self.col]
+                        if verbose: 
+                            print('..removing cell: ' + str(cell) + ' and move ' + 
+                                  str(move) + ' ... original position: ' + str(self.pos))
+                            print('..from list of moves: ' + 
+                                  ', '.join([str(i) for i in moves_remaining]))
+                        poss_cells.remove(cell)
+                        # R E V I E W . . .
+                        moves_remaining.remove(move) #???
 
         # check that any conditions on the move are satisfied
 
@@ -155,6 +166,8 @@ class Piece:
 
     def get_steps(self, forward, sideways, moves_remaining):
         """Return all intermediate steps required (i.e. not inlcuding final step)"""
+
+        i = 0 # failsafe incase of logic error leading to infinite loop
 
         # get shoretlist of single space moves allowed
         for move in moves_remaining[:]:
@@ -168,7 +181,7 @@ class Piece:
 
         steps = []
 
-        while abs(forward) > 1 or abs(sideways) > 1:
+        while (abs(forward) > 1 or abs(sideways) > 1) and i <= 8:
             if verbose: print('...[forward, sideways] moves left: ' + 
                               str([forward, sideways]))
             fwd = -1 if forward < 0 else 1
@@ -189,7 +202,8 @@ class Piece:
                       "not move one step in the direction that I need to? Add more debug " +
                       "messages to work out whats going on.")
                 raise Exception("No valid steps available.")
-            if verbose: print('...step added: ' + str([fwd, sdw]))
+            i += 1
+            if verbose: print('...step ' + i + ' added: ' + str([fwd, sdw]))
 
         return steps
 
@@ -322,6 +336,7 @@ def main():
 
     # a valid move...
     game.pieces['wp1'].move(-2, 0, game)
+    game.pieces['bQ'].move(2, 2, game)
 
     # pause
     if pause_at_end:
