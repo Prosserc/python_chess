@@ -6,7 +6,7 @@ only.
 VERBOSE = True 
 PAUSE_AT_END = False
 
-class Piece(Game):
+class Piece():
     """
     One instance created for each piece in the game containing all of 
     the information and functionality pertaining to that piece.
@@ -263,7 +263,7 @@ class Piece(Game):
         return steps
 
 
-class Board(Game):
+class Board():
     """
     Used to represent the current state of play, records all current 
     positions and interacts with display.
@@ -333,7 +333,7 @@ class Board(Game):
         return display
 
 
-class Game(object):
+class Game():
     """
     Top level class, the game object contains all of the other class 
     instances such as the pieces, the board etc.
@@ -385,7 +385,7 @@ class Game(object):
                         name = 'king'
                     elif ref[1] == 'Q':
                         name = 'queen'
-                    elif ref[1] == 'c':
+                    elif ref[1] == 'r':
                         name = 'rook'
                     elif ref[1] == 'b':
                         name = 'bishop'
@@ -394,8 +394,9 @@ class Game(object):
                     elif ref[1] == 'p':
                         name = 'pawn'
                     else:
-                        raise 'Could not identify name for item (' + \
-                              str(col) + ',' + str(row) + ') in start_pos, ref:' + ref                  
+                        raise Exception('Could not identify name for item (' +
+                                        str(col) + ',' + str(row) + 
+                                        ') in start_pos, ref:' + ref)                  
 
                     pieces[ref] = Piece(ref, name, team, row, col)
         return pieces
@@ -422,7 +423,7 @@ def main():
     game.pieces['wp1'].move(down=-2, right=0, game=game)
 
     # an invalid move (blocked)...
-    game.pieces['bc1'].move(down=-2, right=2, game=game)
+    game.pieces['br1'].move(down=-2, right=2, game=game)
 
     # pause
     if PAUSE_AT_END:
