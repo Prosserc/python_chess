@@ -11,8 +11,6 @@ Left to do on basic two player ASCII mode:
    2. Filters based on additional conditions e.g. first move and if taking for pawns etc.;
    3. Filter based on moves that would put you in check (for each possible move):
       - check each player on other side whether they could move to King;
-   4. Castling?;
-   5. Swap pawns at other side of board;
 2. Reflect moves that are allowed in board.display and game.pieces:
    1. Incl takes / swaps etc;
 3. Build interactive prompts for users to specify moves in turn:
@@ -20,7 +18,15 @@ Left to do on basic two player ASCII mode:
       - Help;
       - Possible moves?;
       - Pieces taken?;
-4. Record data from moves (incl other poss?) for later use in AI.
+4. Check - enforce only moves that get you out of check
+5. Checkmate
+6. Swaps (pawn promotion)
+7. Castling
+8. En Passant restrictions around only one opportuinity to take???
+9. Draw Rules:
+   1. King not in check, has not move and cannot?
+   2. After 50 moves without a pawn being moved or peice being taken (50 move rule)
+10. Record data from moves (incl other poss?) for later use in AI.
 
 Example Board:
 -------------
