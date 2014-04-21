@@ -21,14 +21,14 @@ class Game(object):
         """Initialise game object and create required member objects"""
         positions = [
             [' ', 'A  ', 'B  ', 'C  ', 'D  ', 'E  ', 'F  ', 'G  ', 'H  '], 
-            ['1', 'br1', 'bk1', 'bb1', 'bQ ', 'bK ', 'bb2', 'bk2', 'br2'],
+            ['1', 'br1', 'bk1', 'bb1', 'bQ' , 'bK' , 'bb2', 'bk2', 'br2'],
             ['2', 'bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8'],
             ['3', False, False, False, False, False, False, False, False],
             ['4', False, False, False, False, False, False, False, False],
             ['5', False, False, False, False, False, False, False, False],
             ['6', False, False, False, False, False, False, False, False],
             ['7', 'wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8'],
-            ['8', 'wr1', 'wk1', 'wb1', 'wQ ', 'wK ', 'wb2', 'wk2', 'wr2']]
+            ['8', 'wr1', 'wk1', 'wb1', 'wQ' , 'wK' , 'wb2', 'wk2', 'wr2']]
                      
         self.board = Board(positions=positions)
         self.pieces = self.create_pieces()
@@ -384,7 +384,7 @@ class Move(object):
         # of the possible one step moves
 
         # check steps for pieces cannot jump move more than one space
-        if (not self.piece.allowed_to_jump) and (self.piece.largest > 1):
+        if not self.piece.allowed_to_jump:
             tmp_pos = self.pos
             while tmp_pos != self.new_pos:
                 # get all possible destination cells after a one space step
@@ -429,6 +429,12 @@ class Move(object):
                 current_step += 1
                 if current_step >= MAX_STEPS:
                     break
+
+        # stop knights jumping onto own pieces
+        if self.piece.allowed_to_jump and self.new_pos in self.our_team:
+            invalid_msg = ('This move is blocked as ' + 
+                chr(tmp_pos[1] + ASCII_OFFSET)+str(tmp_pos[0]) + ' is occupied.')
+            return invalid_msg            
 
         return 'okay'
 
