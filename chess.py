@@ -32,6 +32,7 @@ class Game(object):
                      
         self.board = Board(positions=positions)
         self.pieces = self.create_pieces()
+        self.check = False
         self.checkmate = False
         self.turns = 0
 
@@ -75,7 +76,13 @@ class Game(object):
                 invalid_reason = ('A new cell could not be identified from ' +
                                   'your input: ' + prompt)
             else:
-                move = Move(piece, down, right, occupied, our_team)
+                if team == 'white':
+                    our_king, their_king = self.pieces['wK'], self.pieces['bK']
+                else:
+                    our_king, their_king = self.pieces['bK'], self.pieces['wK']
+
+                # create object for move, this evaluates potential issues etc.
+                move = Move(piece, down, right, occupied, our_team, our_king)
 
                 if move.possible:
                     valid = True
@@ -86,6 +93,11 @@ class Game(object):
                     piece.col += right
                     piece.pos = [piece.row, piece.col]
 
+                    # check if anything was taken
+                    if move.take:
+                        taken_ref = self.board.positions[piece.row][piece.col]
+                        self.pieces[taken_ref].taken = True
+
                     # update board
                     self.board.positions[piece.row][piece.col] = piece.ref
                     self.board.positions[piece.row-down][piece.col-right] = False
@@ -95,6 +107,19 @@ class Game(object):
 
             if not valid:
                 print('Please try again: ' + invalid_reason)
+
+        # other player in check?
+        if VERBOSE:
+            print('Checking if other player is in check...')
+        occupied, our_team = Game.get_occupied(self, team)
+        # work out move required to get to their king
+        down, right = their_king.row - piece.row, their_king.col - piece.col
+        theoretical_move = Move(piece, down, right, occupied, our_team, our_king)
+        if theoretical_move.possible:
+            self.check = True
+            if VERBOSE:
+                print('Team ' + ('white' if team == 'black' else 'black') + 
+                      ' in check!!!')
 
     def get_occupied(self, team):
         """Produce list of occupied cells and current teams, pieces."""
@@ -153,11 +178,11 @@ class Board(object):
         game.
         """
         rows = cols = range(9)
-        row_height, col_width, head_width = 4, 9, 6
+        row_height, col_width, head_width = 4, 9, 5
         width = (len(cols[1:]) * col_width) + head_width + 1 # +1 for boarders
         lines = range((len(rows) * row_height)+1)
 
-        display = "\n"*50
+        display = "\n"*60
         for i in lines:
             row = (i/4) # cell down (0-8)
             sep = "|" if row > 0 else " "
@@ -177,7 +202,7 @@ class Board(object):
 
             # if line where a pieces could go
             elif i%row_height == 2:
-                line = "  " + self.positions[row][0][0] + "   " + sep
+                line = "  " + self.positions[row][0][0] + "  " + sep
                 for col in cols[1:]:
                     if self.positions[row][col]:
                         piece = self.positions[row][col][:2]
@@ -281,7 +306,7 @@ class Move(object):
     Capture characteristics of actual or potential moves e.g. amount 
     to go down and right, new row/col etc. for easy comparison. 
     """
-    def __init__(self, piece, down, right, occupied, our_team):
+    def __init__(self, piece, down, right, occupied, our_team, our_king):
         """
         Define move attributes, determine if move is possible and the 
         outcomes reslting from the move or an invalid_reason.
@@ -302,7 +327,7 @@ class Move(object):
         self.our_team = our_team
 
         # initialise variable to be set later...
-        self.check, self.take_ref = None, None
+        self.check, self.take = None, False
         # performance consideration to stop at first invalid reason
         self.possible, self.invalid_reason = self.check_move()
 
@@ -330,12 +355,6 @@ class Move(object):
             if result != 'okay':
                 return False, result
 
-        # check if anything has been taken:
-        # * * *   T O   F O L L O W   * * * 
-
-        # opposition king in check?:
-        # * * *   T O   F O L L O W   * * * 
-
         return True, None
 
     def valid_for_piece(self):
@@ -358,31 +377,58 @@ class Move(object):
         def distance(pos1, pos2):
             """Calculate the distance between two sets of coordinates."""
             return sum([abs(pos2[i] - pos1[i]) for i in range(len(pos1))])
-        # ??? take steps by taking min distance to destination after each
-        #     of the possible one step moves?
-        #     Shouldn't need to worry about boundaries either (as it should
-        #     always be moving closer to destination.)
+        MAX_STEPS = 8
+        current_step = 0
+
+        # take steps by taking min distance to destination after each
+        # of the possible one step moves
 
         # check steps for pieces cannot jump move more than one space
-        if (not self.piece.allowed_to_jump) or (self.piece.largest == 1):
+        if (not self.piece.allowed_to_jump) and (self.piece.largest > 1):
             tmp_pos = self.pos
             while tmp_pos != self.new_pos:
-                steps = [[i[0] + self.down, i[1] + self.right]
-                         for i in self.piece.one_space_moves]
-                distances = [distance(i, self.new_pos) for i in steps]
-                correct_step = steps[distances.index(min(distances))]
-                tmp_pos = [tmp_pos[0] + correct_step[0], 
-                           tmp_pos[1] + correct_step[1]]
+                # get all possible destination cells after a one space step
+                poss_steps = [[i[0] + tmp_pos[0], i[1] + tmp_pos[1]]
+                              for i in self.piece.one_space_moves
+                              if i[0] + tmp_pos[0] in range(1, 9) and
+                                 i[1] + tmp_pos[1] in range(1, 9)]
+                if VERBOSE:
+                    print('Possible steps: ' + ', '.join(str(i) for i in poss_steps))
 
-                # check if tmp_pos is occupied
+                distances = [distance(i, self.new_pos) for i in poss_steps]
+                if VERBOSE:
+                    print('Distances: ' + ', '.join(str(i) for i in distances))
+
+                correct_step = poss_steps[distances.index(min(distances))]
+                if VERBOSE:
+                    print('Min dist: ' + str(min(distances)))
+                    print('Correct step: ' + str(correct_step))
+
+                tmp_pos = correct_step
+                if VERBOSE:
+                    print('tmp_pos: ' + str(tmp_pos))
+
+                # check if cell on the way is occupied
                 if tmp_pos in self.occupied:
-                    invalid_msg = ('This move is blocked as ' + 
-                        chr(tmp_pos[1] + ASCII_OFFSET)+str(tmp_pos[0]) + 
-                        ' is occupied.')
-                    return invalid_msg
+                    final_step = (tmp_pos == self.new_pos)
+                    # if it's not the final position or they are in our team block
+                    if (not final_step) or (tmp_pos in self.our_team):
+                        invalid_msg = ('This move is blocked as ' + 
+                            chr(tmp_pos[1] + ASCII_OFFSET)+str(tmp_pos[0]) + 
+                            ' is occupied.')
+                        return invalid_msg
+                    # also block if it is pawn going straight forward
+                    elif (self.piece.name == 'pawn') and (self.right == 0):
+                        invalid_msg = ('Pawns cannot move straight forward ' +
+                                       'when obstructed by another piece.')
+                        return invalid_msg
+                    # if on final step and above two don't apply then you can take
+                    elif tmp_pos == self.new_pos:
+                        self.take = True
 
-        # check for pawns if blocked in front
-
+                current_step += 1
+                if current_step >= MAX_STEPS:
+                    break
 
         return 'okay'
 
@@ -420,10 +466,6 @@ if __name__ == '__main__':
 ##  N O T E S :
 ##  =========
 ##  
-##  Moves:
-##    - all poss combs created against each piece;
-##    - filter from there based on conditions, check etc;
-##    - make process for user turns / instructions
 ##    - write info to database (for future AI data):
 ##      - just get all raw data here (incl possible moves?):
 ##        - feature engineering can then be done in batch to enrich data e.g.:
@@ -434,10 +476,6 @@ if __name__ == '__main__':
 ##          - move direction
 ##          - piece value
 ##          - some measure of the moves risk level?
-
-
-##  Design:
-##    - any better way to factor in conditions (on_first etc.) inline with OO style
 
 
 ##  Features:
@@ -455,16 +493,3 @@ if __name__ == '__main__':
 ##        select.)
 ##    - consider concept of piece type so that each type on parses it's moves etc once?
 ##    - move occupied list to get once per turn
-##    - maybe pass occupied into steps function to stop looping once an occiped cell has 
-##      cell has been reached?
-
-
-##  Strategy:
-##  maybe I should reconsider approach of calculating all moves allowed?
-##  - computationally expensive:
-##    - O = MSP (M = valid moves for piece; S = intermediate steps; P = occipied cells;)
-##      just for blocking checks
-##    - checking if a move puts king in check would also be huge as you would need to
-##      consider: 
-##      - all of the moves that may be made by each piece on other team (or shorten by
-##        checking just if the move from each piece to where King is is possible)
