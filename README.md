@@ -12,18 +12,15 @@ Left to do on basic two player ASCII mode:
 -----------------------------------------
 
 1. Calculating moves allowed:
-   1. Filters based on additional conditions e.g. first move and if taking for pawns etc.;
-   2. Filter based on moves that would put you in check:
-      - check each player on other side whether they could move to King;
-2. Check - enforce only moves that get you out of check ... in prog
-3. Checkmate ... in prog
-4. Swaps (pawn promotion)
-5. Castling
-6. En Passant restrictions around only one opportuinity to take???
-7. Draw Rules:
+   - Filters based on additional conditions e.g. first move and if taking for pawns etc.;
+2. Checkmate ... in prog
+3. Swaps (pawn promotion)
+4. Castling
+5. En Passant restrictions around only one opportuinity to take???
+6. Draw Rules:
    1. King not in check, has not move and cannot?
    2. After 50 moves without a pawn being moved or peice being taken (50 move rule)
-8. Record data from moves (incl other poss?) for later use in AI.
+7. Record data from moves (incl other poss?) for later use in AI.
 
 Consider Features:
 -----------------
