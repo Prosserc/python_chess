@@ -71,7 +71,7 @@ class Game(object):
                                                   row, col, move_dict)
         return pieces
 
-    def take_turn(self, team):
+    def take_turn(self, team, prompt=None):
         """ Interact with player to facilitate moves, capture data and 
         identify/store information common to all potential moves."""
         global VERBOSE
@@ -82,11 +82,15 @@ class Game(object):
 
         # repeat prompt until a valid move is given...
         while not valid:
-            prompt = raw_input(">> ")
+            if not prompt:
+                prompt = raw_input(">> ")
 
             # ability to switch debugging on/off
             if prompt.lower()[:5] == 'debug':
                 VERBOSE = not VERBOSE
+                continue
+            elif prompt.lower() == 'redraw':
+                print(self.board.draw_board())
                 continue
 
             piece, down, right = self.parse_prompt(prompt, our_team)
@@ -98,37 +102,40 @@ class Game(object):
             elif down not in range(-8, 9) or right not in range(-8, 9):
                 invalid_reason = ('A new cell could not be identified from ' +
                                   'your input: ' + prompt)
-
-            # create object for move, this evaluates potential issues etc.
-            move = Move(piece, down, right, occupied, our_team, their_team)
-
-            if move.possible:
-                 # reset flag (if they were able to move they are not in check) 
-                self.check = False
-                valid = True
-
-                # update piece attributes
-                piece.move_cnt += 1
-                piece.row += down
-                piece.col += right
-                piece.pos = [piece.row, piece.col]
-
-                # check if anything was taken
-                if move.take:
-                    # get ref of taken piece BEFORE board update (after piece update)
-                    taken_ref = self.board.positions[piece.row][piece.col]
-                    self.pieces[taken_ref].taken = True
-                    if VERBOSE:
-                        shout('taken piece: ' + taken_ref)
-
-                # update board
-                self.board.positions[piece.row][piece.col] = piece.ref
-                self.board.positions[piece.row-down][piece.col-right] = False
-                print self.board.draw_board()
             else:
-                invalid_reason = move.invalid_reason
+
+
+                # create object for move, this evaluates potential issues etc.
+                move = Move(piece, down, right, occupied, our_team, their_team)
+
+                if move.possible:
+                     # reset flag (if they were able to move they are not in check) 
+                    self.check = False
+                    valid = True
+
+                    # update piece attributes
+                    piece.move_cnt += 1
+                    piece.row += down
+                    piece.col += right
+                    piece.pos = [piece.row, piece.col]
+
+                    # check if anything was taken
+                    if move.take:
+                        # get ref of taken piece BEFORE board update
+                        taken_ref = self.board.positions[move.new_row][move.new_col]
+                        self.pieces[taken_ref].taken = True
+                        if VERBOSE:
+                            shout('taken piece: ' + taken_ref)
+
+                    # update board
+                    self.board.positions[piece.row][piece.col] = piece.ref
+                    self.board.positions[piece.row-down][piece.col-right] = False
+                    print(self.board.draw_board())
+                else:
+                    invalid_reason = move.invalid_reason
 
             if not valid:
+                prompt = None
                 print(invalid_reason + '\nPlease try again:')
 
         # other player in check?
@@ -200,8 +207,6 @@ class Game(object):
         theoretical_move = Move(piece, down, right, occupied, our_team, 
                                 their_team, theoretical_move=True)
         if theoretical_move.possible:
-            if VERBOSE:
-                shout('Team ' + their_king.team + ' in check')
             return True
         else:
             if VERBOSE:
@@ -210,17 +215,17 @@ class Game(object):
 
     def in_checkmate(self, occupied, our_team, their_team):
         """Determine whether the opponents king is in checkmate, done 
-        by creating a theoretical_move for each piece on the opponents 
-        team to see if any are valid i.e. end with their king not in 
-        check."""
+        by creating many theoretical moves for each piece on the  
+        opponents team to see if any are valid i.e. end with their 
+        king not in check."""
         for ref, piece in their_team.items():
             # intentionally reverse our team and their team params as 
             # we want to simulate all possible moves for opponent
             all_possible_moves = self.get_all_possible_moves(piece, occupied, 
                                                              their_team, our_team)
             if VERBOSE:
-                print('Possible moves for ' + ref + ', '.join([str(i) for i in 
-                                                               all_possible_moves]))
+                print('Possible moves for ' + ref + ': ' + 
+                      ', '.join([str(i.move) for i in all_possible_moves]))
 
             if len(all_possible_moves) > 0:
                 return False
@@ -233,12 +238,19 @@ class Game(object):
         all_possible_moves = []
         for potential_move in piece.valid_moves:
             [down, right] = potential_move[:2]
-            theoretical_move = Move(piece, down, right, occupied, our_team, 
-                                    their_team, theoretical_move=True)
+            theoretical_move = Move(piece, down, right, occupied, 
+                                         our_team, their_team, 
+                                         theoretical_move=True)
             if theoretical_move.possible:
                 # T O   R E V I E W 
                 # keep list of move obj like this for later reuse in next turn?
+                # create a unique id for each move (which reflects the current
+                # position of every piece as well as piece_ref and new pos).
+                # when creating a move check for matches first?
+                # Should destroy once > 1 move old to prevent build up?
                 all_possible_moves.append(theoretical_move)
+            del theoretical_move
+
         return all_possible_moves
 
 
@@ -251,11 +263,7 @@ class Board(object):
         """Create board display based on game.positions passed in."""
         self.positions = positions
         self.display = self.draw_board()
-        print self.display
-
-    # def show_board(self):
-    #     """Display board to user."""
-    #     print self.display
+        print(self.display)
 
     def draw_board(self):
         """ASCII display showing the current state of the game."""
@@ -364,7 +372,7 @@ class Move(object):
     to go down and right, new row/col etc. for easy comparison. 
     """
     def __init__(self, piece, down, right, occupied, our_team, their_team,
-                 theoretical_move=False):
+                 theoretical_move=False, stop_recursion=False):
         """
         Define move attributes, determine if move is possible and the 
         outcomes reslting from the move or an invalid_reason.
@@ -389,6 +397,7 @@ class Move(object):
         self.their_team_cells = [their_team[piece_ref].pos 
                                  for piece_ref in their_team]
         self.theoretical_move = theoretical_move
+        self.stop_recursion = stop_recursion
 
         # initialise variable to be set later...
         self.check, self.take = None, False
@@ -509,11 +518,38 @@ class Move(object):
         """Check if all conditions stored for the move are satisfied. 
         The conditions are identified when the piece is created e.g. a 
         pawn only being able to move diagonally if taking."""
-        conditions = [i[:2] for i in self.piece.valid_moves].index(self.move)
+        ind = [i[:2] for i in self.piece.valid_moves].index(self.move)
+        try:
+            conditions = self.piece.valid_moves[ind][2:]
+        except IndexError:
+            return 'okay' # no conditions on move
+
+        for cond in conditions:
+            if VERBOSE and not self.theoretical_move:
+                print('Checking condition: ' + str(cond)) 
+            
+            if cond == 'on_first':
+                if self.piece.move_cnt > 0:
+                    invalid_msg = ("A pawn can only move two spaces on it's " +
+                                   "first move.")
+                    return invalid_msg
+            elif cond == 'on_take':
+                if self.new_pos not in self.occupied:
+                    invalid_msg = 'A pawn can only move diagonally when taking.'
+                    return invalid_msg
+            #   T O   F O L L O W . . .
+            elif cond == 'en_passant':
+                invalid_msg = "Sorry " + cond + " rule not coded yet."
+                return invalid_msg
         return 'okay'
 
     def king_safe(self):
-        """Check if a move would put you in check"""
+        """Check if a move would put your king in check"""
+        # define base case as the move object is created recursively below
+        invalid_msg = None
+        if self.stop_recursion:
+            return 'okay'
+
         # need to temporarily update piece object, so that all of the theoretical
         # moves checked below will recognise the new position (i.e. as if you had
         # made the move).
@@ -523,36 +559,35 @@ class Move(object):
         self.occupied[self.occupied.index([old_row, old_col])] = (
             [self.new_row, self.new_col])
 
-        # iterate through dictionary of their pieces creating theoretical moves
-        # attempting to take king, if possible then move would put you in check.
         if self.piece.team == 'white':
             our_king, their_king = self.our_team['wK'], self.their_team['bK']
         else:
             our_king, their_king = self.our_team['bK'], self.their_team['wK']
 
-        # prevent ongoing recursion if on a theoretical move to see if their
-        # king is in check
-        if self.theoretical_move == True and self.new_pos == their_king.pos:
-            return 'okay'
-
+        # iterate through dictionary of their pieces creating theoretical moves
+        # attempting to take king, if possible then move would put you in check.
         for ref, their_piece in self.their_team.items(): 
             down = our_king.row - their_piece.row
             right = our_king.col - their_piece.col
             # reverse our_team and their team args to switch
             theoretical_move = Move(their_piece, down, right, self.occupied, 
                                     self.their_team, self.our_team, 
-                                    theoretical_move=True)
+                                    theoretical_move=True,
+                                    stop_recursion=True)
             if theoretical_move.possible:
                 invalid_msg = ('You cannot move to this space as it would put ' +
                                'your king in check with the ' + their_piece.name +
                                ' in cell ' + pos_to_cell_ref(theoretical_move.pos))
-                return invalid_msg
+                break # cannot return here as need to revert position etc.
+            del theoretical_move
         # revert piece to original position
         self.piece.row, self.piece.col, self.piece.pos = old_row, old_col, old_pos
         self.occupied[self.occupied.index([self.new_row, self.new_col])] = \
             [old_row, old_col]
 
-        return 'okay'
+        if not invalid_msg:
+            return 'okay'
+        return invalid_msg
 
 
 ################   G E N E R A L   U T I L I T I E S   ################
@@ -571,7 +606,7 @@ def cell_ref_to_pos(cell_ref):
 def shout(msg, suffix=' !!!'):
     """print message in all caps with spaces between and a suffix"""
     adj_msg = ' '.join([str(i).upper() for i in str(msg)+str(suffix)])
-    print adj_msg
+    print(adj_msg)
 
 def main():
     """Main entry point for program"""
@@ -585,7 +620,7 @@ def main():
     # pause         
     if PAUSE_AT_END:
         foo = raw_input('\nPress enter to quit')
-        print foo
+        print(foo)
 
 if __name__ == '__main__':
     main()
