@@ -87,9 +87,11 @@ class Game(object):
 
             # ability to switch debugging on/off
             if prompt.lower()[:5] == 'debug':
+                prompt = None
                 VERBOSE = not VERBOSE
                 continue
             elif prompt.lower() == 'redraw':
+                prompt = None
                 print(self.board.draw_board())
                 continue
 
@@ -537,6 +539,8 @@ class Move(object):
                 if self.new_pos not in self.occupied:
                     invalid_msg = 'A pawn can only move diagonally when taking.'
                     return invalid_msg
+                else:
+                    self.piece.valid_moves.remove(self.move+[cond])
             #   T O   F O L L O W . . .
             elif cond == 'en_passant':
                 invalid_msg = "Sorry " + cond + " rule not coded yet."
@@ -556,6 +560,12 @@ class Move(object):
         old_row, old_col, old_pos = self.row, self.col, self.pos # copy for reverting
         self.piece.row, self.piece.col = self.new_row, self.new_col
         self.piece.pos = self.new_pos 
+        if self.take:
+            taken_ref = [ref for ref in self.their_team.keys() 
+                         if self.their_team[ref].pos == self.new_pos][0]
+            taken_piece = self.their_team[taken_ref]
+            if taken_piece.name != 'king':
+                del self.their_team[taken_ref]
         self.occupied[self.occupied.index([old_row, old_col])] = (
             [self.new_row, self.new_col])
 
@@ -580,10 +590,15 @@ class Move(object):
                                ' in cell ' + pos_to_cell_ref(theoretical_move.pos))
                 break # cannot return here as need to revert position etc.
             del theoretical_move
+
         # revert piece to original position
         self.piece.row, self.piece.col, self.piece.pos = old_row, old_col, old_pos
-        self.occupied[self.occupied.index([self.new_row, self.new_col])] = \
-            [old_row, old_col]
+        self.occupied[self.occupied.index(self.new_pos)] = [old_row, old_col]
+        if self.take:
+            self.occupied.append(self.new_pos) # re-instate taken piece
+            if taken_piece.name != 'king':
+                self.their_team[taken_ref] = taken_piece
+
 
         if not invalid_msg:
             return 'okay'
