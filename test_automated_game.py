@@ -1,13 +1,12 @@
 #!/usr/bin/python 
 """Unit test for chess.py - an automated game. As AI is not yet built
-these will be purely random moves with no intellegence, but will surve 
+these will be purely random moves with no intellegence, but will serve 
 as a good test it will cover a broad array of pieces / moves."""
 from chess import *
 from random import random as rnd
+from time import sleep
 
-# To Do
-# -----
-# bhild in customisable delay after each turn
+SLEEP_SECS = 3 # no of seconds to sleep after a move
 
 def random_move(game, team):
     """Select a move randomly from all possible moves."""
@@ -20,7 +19,6 @@ def random_move(game, team):
 
     # get random index
     i = int(rnd()*cnt)
-    print i, len(obj_list)
     return obj_list[i]
 
 def play():
@@ -34,6 +32,7 @@ def play():
         for team in ['white', 'black']:
             move_obj = random_move(game, team)
             game.take_turn(team, prompt=None, move=move_obj)
+            sleep(SLEEP_SECS)
 
 if __name__ == '__main__':
     play()
