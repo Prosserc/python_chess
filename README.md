@@ -11,18 +11,12 @@ Example Board:
 Left to do on basic two player ASCII mode:
 -----------------------------------------
 
-1. Calculating moves allowed:
-   - Filters based on additional conditions e.g. first move and if taking for pawns etc.;
-2. Checkmate ... in prog
-3. Swaps (pawn promotion)
-4. Castling
-5. En Passant restrictions around only one opportuinity to take???
-6. Draw Rules:
+1. Swaps (pawn promotion)
+2. Castling
+3. En Passant restrictions around only one opportuinity to take???
+4. Draw Rules:
    1. King not in check, has not move and cannot?
    2. After 50 moves without a pawn being moved or peice being taken (50 move rule)
-7. Record data from moves (incl other poss?) for later use in AI.
-
-Consider Features:
------------------
-
-- Option to show possible moves?
+5. Record data from moves (incl other poss?) for later use in AI.
+6. Heading above board i.e. whos turn, in_check? etc...
+7. Help menu
