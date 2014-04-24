@@ -53,6 +53,7 @@ class Game(object):
         self.check = False
         self.checkmate = False
         self.turns = 0
+        self.current_team = None
 
     def create_pieces(self, move_dict):
         """Creates a object for each piece and creates a dictionary to 
@@ -71,100 +72,120 @@ class Game(object):
                                                   row, col, move_dict)
         return pieces
 
-    def take_turn(self, team, prompt=None):
+    # def start_turn(self, team):
+    #     """Allows you to register a turn withour going through all of 
+    #     the code in take_turn, useful for using as a programming 
+    #     interface when selecting moves from outside of this module."""
+    #     self.current_team = team
+    #     self.turns += 1
+
+    def take_turn(self, team, prompt=None, move=None):
         """ Interact with player to facilitate moves, capture data and 
-        identify/store information common to all potential moves."""
+        identify/store information common to all potential moves.
+        Also inlcudes optional param to specify a prompt to run 
+        automatically or a move object (for interface from external
+        scripts)."""
         global VERBOSE
+        self.turns += 1
+        self.current_team = team
         print("Team " + team + ":\nplease specify your move e.g. to move " +
               "from A7 to A5 just enter: A7, A5")
-        occupied, our_team, their_team = Game.get_occupied(self, team)
+        occupied, our_team, their_team = self.get_occupied()
         valid = False
 
         # repeat prompt until a valid move is given...
         while not valid:
-            if not prompt:
-                prompt = raw_input(">> ")
-
-            # ability to switch debugging on/off
-            if prompt.lower()[:5] == 'debug':
-                prompt = None
-                VERBOSE = not VERBOSE
-                continue
-            elif prompt.lower() == 'redraw':
-                prompt = None
-                print(self.board.draw_board())
-                continue
-
-            piece, down, right = self.parse_prompt(prompt, our_team)
-
-            if not piece:
-                invalid_reason = ('A piece in your team could not be found ' +
-                                  'in cell: ' + prompt[:2] + '\n(using the ' +
-                                  'first two charchters from your entry)')
-            elif down not in range(-8, 9) or right not in range(-8, 9):
-                invalid_reason = ('A new cell could not be identified from ' +
-                                  'your input: ' + prompt)
+            # skip set up if a move object is passed in...
+            if move:
+                piece, down, right = move.piece, move.down, move.right
             else:
+                if not prompt:
+                    prompt = raw_input(">> ")
 
+                # ability to switch debugging on/off
+                if prompt.lower()[:5] == 'debug':
+                    prompt = None
+                    VERBOSE = not VERBOSE
+                    continue
+                elif prompt.lower() == 'redraw':
+                    prompt = None
+                    print(self.board.draw_board())
+                    continue
+                elif prompt.lower() == 'list':
+                    prompt = None
+                    self.get_all_possible_moves(list_moves=True)
+                    continue
+
+                piece, down, right = self.parse_prompt(prompt, our_team)
+
+                if not piece:
+                    invalid_reason = ('A piece in your team could not be found ' +
+                                      'in cell: ' + prompt[:2] + '\n(using the ' +
+                                      'first two charchters from your entry)')
+                    continue
+                elif down not in range(-8, 9) or right not in range(-8, 9):
+                    invalid_reason = ('A new cell could not be identified from ' +
+                                      'your input: ' + prompt)
+                    continue
 
                 # create object for move, this evaluates potential issues etc.
                 move = Move(piece, down, right, occupied, our_team, their_team)
 
-                if move.possible:
-                     # reset flag (if they were able to move they are not in check) 
-                    self.check = False
-                    valid = True
+            if move.possible:
+                 # reset flag (if able to move they are not in check) 
+                self.check = False
+                valid = True
 
-                    # update piece attributes
-                    piece.move_cnt += 1
-                    piece.row += down
-                    piece.col += right
-                    piece.pos = [piece.row, piece.col]
+                # update piece attributes
+                piece.move_cnt += 1
+                piece.row += down
+                piece.col += right
+                piece.pos = [piece.row, piece.col]
 
-                    # check if anything was taken
-                    if move.take:
-                        # get ref of taken piece BEFORE board update
-                        taken_ref = self.board.positions[move.new_row][move.new_col]
-                        self.pieces[taken_ref].taken = True
-                        if VERBOSE:
-                            shout('taken piece: ' + taken_ref)
+                # check if anything was taken
+                if move.take:
+                    # get ref of taken piece BEFORE board update
+                    take_ref = self.board.positions[move.new_row][move.new_col]
+                    self.pieces[take_ref].taken = True
+                    if VERBOSE:
+                        shout('taken piece: ' + take_ref)
 
-                    # update board
-                    self.board.positions[piece.row][piece.col] = piece.ref
-                    self.board.positions[piece.row-down][piece.col-right] = False
-                    print(self.board.draw_board())
-                else:
-                    invalid_reason = move.invalid_reason
+                # update board
+                self.board.positions[piece.row][piece.col] = piece.ref
+                self.board.positions[piece.row-down][piece.col-right] = False
+                print(self.board.draw_board())
+            else:
+                invalid_reason = move.invalid_reason
 
             if not valid:
                 prompt = None
                 print(invalid_reason + '\nPlease try again:')
 
         # other player in check?
-        occupied, our_team, their_team = Game.get_occupied(self, team) # refresh
-        self.check = self.in_check(piece, team, occupied, our_team, their_team)
+        occupied, our_team, their_team = self.get_occupied() # refresh
+        self.check = self.in_check(piece, occupied, our_team, their_team)
         if self.check:
-            other_team = ('black' if team == 'white' else 'white')
+            other_team = ('black' if self.current_team == 'white' else 'white')
             shout(other_team + ' team in check')
             print('looking for checkmate....\n')
 
             # other player in checkmate?
             self.checkmate = self.in_checkmate(occupied, our_team, their_team)
             if self.checkmate:
-                shout('game over, ' + team + ' team wins')
+                shout('game over, ' + self.current_team + ' team wins')
                 raw_input('\nPress enter to close game...')
                 raise Exception('Game Finished')
             else:
                 print('not checkmate, moves are possible.')
 
-    def get_occupied(self, team):
+    def get_occupied(self):
         """Produce list of occupied cells and current teams, pieces."""
         occupied, our_team, their_team = [], {}, {}
         for ref, piece in self.pieces.items():
             if not piece.taken:
                 occupied.append(piece.pos)
                 # build up dict of piece objects for each team
-                if piece.team == team:
+                if piece.team == self.current_team:
                     our_team[ref] = piece
                 else:
                     their_team[ref] = piece
@@ -192,7 +213,7 @@ class Game(object):
             return self.pieces[piece_ref], None, None
         return self.pieces[piece_ref], down, right
 
-    def in_check(self, piece, team, occupied, our_team, their_team):
+    def in_check(self, piece, occupied, our_team, their_team):
         """Determine whether the opponent's king is in check, done by 
         creating a theoretical_move from the attaching piece's current 
         position to their King's position to see if the move would be 
@@ -201,7 +222,8 @@ class Game(object):
             print('Checking if other player is in check...')
 
         # work out move required to get to their king
-        their_king = self.pieces['wK'] if team == 'black' else self.pieces['bK']
+        their_king = (self.pieces['wK'] if self.current_team == 'black' 
+                      else self.pieces['bK'])
         down, right = their_king.row - piece.row, their_king.col - piece.col
         if VERBOSE:
             print('..possible to move ' + piece.ref + ' from ' + 
@@ -221,39 +243,68 @@ class Game(object):
         opponents team to see if any are valid i.e. end with their 
         king not in check."""
         for ref, piece in their_team.items():
+            # call one piece at a time to stop after first piece found with
+            # possible moves
+            p_dict = {ref: piece}
             # intentionally reverse our team and their team params as 
             # we want to simulate all possible moves for opponent
-            all_possible_moves = self.get_all_possible_moves(piece, occupied, 
-                                                             their_team, our_team)
-            if VERBOSE:
-                print('Possible moves for ' + ref + ': ' + 
-                      ', '.join([str(i.move) for i in all_possible_moves]))
-
-            if len(all_possible_moves) > 0:
+            all_moves, cnt = self.get_all_possible_moves(occupied=occupied, 
+                                                         our_team=their_team, 
+                                                         their_team=our_team, 
+                                                         pieces=p_dict,
+                                                         list_moves=VERBOSE)
+            if cnt > 0:
                 return False
-
         return True
 
-    def get_all_possible_moves(self, piece, occupied, our_team, their_team):
-        """Try all of the valid moves for the piece passed in and 
-        return a list of those that are possible."""
-        all_possible_moves = []
-        for potential_move in piece.valid_moves:
-            [down, right] = potential_move[:2]
-            theoretical_move = Move(piece, down, right, occupied, 
-                                         our_team, their_team, 
-                                         theoretical_move=True)
-            if theoretical_move.possible:
-                # T O   R E V I E W 
-                # keep list of move obj like this for later reuse in next turn?
-                # create a unique id for each move (which reflects the current
-                # position of every piece as well as piece_ref and new pos).
-                # when creating a move check for matches first?
-                # Should destroy once > 1 move old to prevent build up?
-                all_possible_moves.append(theoretical_move)
-            del theoretical_move
+    def get_all_possible_moves(self, occupied=None, our_team=None, 
+                               their_team=None, pieces=None,
+                               list_moves=False, team=None):
+        """Try all of the valid moves for the pieces passed in, pieces 
+        arg should be a dictionary of piece objects with piece_ref as 
+        their key. Return a dictionary with same keys, where value is 
+        a list containing a move objects for each possible move for 
+        that piece (can be[]).
+        If occupied, our_team or their_team are not supplied a new call
+        is made to self.get_occupied.
+        If pieces is not supplied this is defaulted to our_team.
+        Team param is picked up from game object when not supplied."""
+        # get defaults if args missing
+        if not team:
+            team = self.current_team
+        else:
+            self.current_team = team
+        if (not occupied) or (not our_team) or (not their_team):
+            occupied, our_team, their_team = self.get_occupied()
+        if not pieces:
+            pieces = our_team
 
-        return all_possible_moves
+        all_possible_moves, cnt = {}, 0
+        for ref, piece in iter(sorted(pieces.items())):
+            all_possible_moves[ref] = []
+            for potential_move in piece.valid_moves:
+                [down, right] = potential_move[:2]
+                theoretical_move = Move(piece, down, right, occupied, our_team, 
+                                        their_team, theoretical_move=True)
+                if theoretical_move.possible:
+                    # T O   R E V I E W 
+                    # keep list of move obj like this for later reuse in next 
+                    # turn? create a unique id for each move (which reflects 
+                    # the current position of every piece as well as piece_ref 
+                    # and new pos). 
+                    # hen creating a move check for matches first?
+                    # Should destroy once > 1 move old to prevent build up?
+                    all_possible_moves[ref].append(theoretical_move)
+                    cnt += 1
+                del theoretical_move
+        if list_moves:
+            print('\nPossible moves:') 
+            for ref, moves in iter(sorted(all_possible_moves.items())):
+                print(self.pieces[ref].name.ljust(6) + 
+                      (' (' + ref + ')').ljust(5) + ': ' + 
+                      ', '.join([pos_to_cell_ref(obj.new_pos) for obj in moves]))
+
+        return all_possible_moves, cnt
 
 
 class Board(object):
@@ -379,7 +430,7 @@ class Move(object):
         Define move attributes, determine if move is possible and the 
         outcomes reslting from the move or an invalid_reason.
         """
-        self.piece = piece
+        self.piece = piece # store piece object against move
         self.down = down
         self.right = right
         self.move = [down, right]
@@ -561,11 +612,11 @@ class Move(object):
         self.piece.row, self.piece.col = self.new_row, self.new_col
         self.piece.pos = self.new_pos 
         if self.take:
-            taken_ref = [ref for ref in self.their_team.keys() 
+            take_ref = [ref for ref in self.their_team.keys() 
                          if self.their_team[ref].pos == self.new_pos][0]
-            taken_piece = self.their_team[taken_ref]
+            taken_piece = self.their_team[take_ref]
             if taken_piece.name != 'king':
-                del self.their_team[taken_ref]
+                del self.their_team[take_ref]
         self.occupied[self.occupied.index([old_row, old_col])] = (
             [self.new_row, self.new_col])
 
@@ -597,7 +648,7 @@ class Move(object):
         if self.take:
             self.occupied.append(self.new_pos) # re-instate taken piece
             if taken_piece.name != 'king':
-                self.their_team[taken_ref] = taken_piece
+                self.their_team[take_ref] = taken_piece
 
 
         if not invalid_msg:
@@ -617,6 +668,21 @@ def cell_ref_to_pos(cell_ref):
     """converts a cell_ref as given by the user (e.g. 'B6' to describe
     column B, row 6) into a [row, col] list e.g. 'E2' => [2, 5]."""
     return [int(cell_ref[1]), ord(cell_ref[0].upper())-ASCII_OFFSET]
+
+def listsum(opperator='+', *args):
+    """Perform an aggregation of lists by the opperator supplied e.g. 
+    listsum('+'. [3, 6], [2, 2]) would return [5, 7]. The number of 
+    lists supplied is arbitrary, but each list must have the same 
+    number of elements."""
+    l = len(args[1])
+    res = args[0]
+    for i, arg in enumerate(args[1:]):
+        if len(arg) != l:
+            raise Exception("The length of all arguements must be the same")
+        for j, item in enumerate(arg):
+            cmd = "res[j] " + opperator + "= " + str(item)
+            exec(cmd)
+    return res
 
 def shout(msg, suffix=' !!!'):
     """print message in all caps with spaces between and a suffix"""
@@ -648,26 +714,23 @@ if __name__ == '__main__':
 ##      - just get all raw data here (incl possible moves?):
 ##        - feature engineering can then be done in batch to enrich data e.g.:
 ##          - move preceding a take (on which side / by how many moves)
-##          - other performance metrics e.g. short, mid and long term prospects after 
-##            move, i.e. how overall position in game improved / declined over next 
-##            x, y, z moves and who eventually won.
+##          - other performance metrics e.g. short, mid and long term prospects
+##            after move, i.e. how overall position in game improved / declined
+##            over next x, y, z moves and who eventually won.
 ##          - move direction
 ##          - piece value
 ##          - some measure of the moves risk level?
 
 
 ##  Features:
-##    - consider option to list legal moves for a piece
 ##    - help feature to list shortcuts / features etc.
 
 
 ##  Performance:
-##    - load all possible moves for each player at the start of each turn so that
-##      they are already know by the time the player comes to move?
-##      - if doing this would need a keyboardinterupt exception e.g.
-##        http://stackoverflow.com/questions/7180914/pause-resume-a-python-script-in-middle
-##        to pick up cases when the user was ready to make their move before all 
-##        possible moves had been pre-loaded (then just get moves for the piece they
-##        select.)
-##    - consider concept of piece type so that each type on parses it's moves etc once?
-##    - move occupied list to get once per turn
+##    - load all possible moves for each player at the start of each turn so 
+##      that they are already know by the time the player comes to move?
+##      - if doing this would need a keyboardinterupt exception???
+##        To pick up cases when the user was ready to make their move before  
+##        all possible moves had been pre-loaded (then just get moves for the 
+##        piece they select) e.g.:
+##http://stackoverflow.com/questions/7180914/pause-resume-a-python-script-in-middle
