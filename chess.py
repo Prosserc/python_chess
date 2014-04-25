@@ -1,8 +1,7 @@
 #!/usr/bin/python 
 """Python implementation of chesss, in ASCII mode, two player only. """
-VERBOSE = True 
+VERBOSE = False 
 PAUSE_AT_END = False
-ASCII_OFFSET = 64 # used to convert numbers to ascii letter codes
 
 
 class Game(object):
@@ -657,6 +656,9 @@ class Move(object):
 
 
 ################   G E N E R A L   U T I L I T I E S   ################
+
+
+ASCII_OFFSET = 64 # used to convert numbers to ascii letter codes
 
 def pos_to_cell_ref(pos):
     """converts and [row, col] list into a cell reference where the
