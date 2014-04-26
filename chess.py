@@ -1,7 +1,12 @@
 #!/usr/bin/python 
 """Python implementation of chesss, in ASCII mode, two player only. """
+import json
+
 VERBOSE = False 
 PAUSE_AT_END = False
+LOGGING = False
+LOG = ''
+LOG_FILE_PATH = 'log.json'
 
 
 class Game(object):
@@ -51,8 +56,14 @@ class Game(object):
         self.pieces = self.create_pieces(move_dict)
         self.check = False
         self.checkmate = False
+        self.draw = False
         self.turns = 0
         self.current_team = None
+
+    def to_JSON(self):
+        """Output entire object contents as json."""
+        return json.dumps(self, default=lambda o: o.__dict__, 
+                          sort_keys=True, indent=4)
 
     def create_pieces(self, move_dict):
         """Creates a object for each piece and creates a dictionary to 
@@ -71,20 +82,13 @@ class Game(object):
                                                   row, col, move_dict)
         return pieces
 
-    # def start_turn(self, team):
-    #     """Allows you to register a turn withour going through all of 
-    #     the code in take_turn, useful for using as a programming 
-    #     interface when selecting moves from outside of this module."""
-    #     self.current_team = team
-    #     self.turns += 1
-
     def take_turn(self, team, prompt=None, move=None):
         """ Interact with player to facilitate moves, capture data and 
         identify/store information common to all potential moves.
         Also inlcudes optional param to specify a prompt to run 
         automatically or a move object (for interface from external
         scripts)."""
-        global VERBOSE
+        global VERBOSE, LOG
         self.turns += 1
         self.current_team = team
         print("Team " + team + ":\nplease specify your move e.g. to move " +
@@ -108,7 +112,7 @@ class Game(object):
                     continue
                 elif prompt.lower() == 'redraw':
                     prompt = None
-                    print(self.board.draw_board())
+                    print(self.board.draw_board())               
                     continue
                 elif prompt.lower() == 'list':
                     prompt = None
@@ -170,12 +174,25 @@ class Game(object):
 
             # other player in checkmate?
             self.checkmate = self.in_checkmate(occupied, our_team, their_team)
-            if self.checkmate:
-                shout('game over, ' + self.current_team + ' team wins')
-                raw_input('\nPress enter to close game...')
-                raise Exception('Game Finished')
-            else:
-                print('not checkmate, moves are possible.')
+
+        # TMP - UNTIL PROPER DRAW RULES
+        if self.turns >= 200:
+            shout(str(self.turns) + ' moves, lets call it a draw')
+            self.draw = True
+
+        # log state of game
+        if LOGGING:
+            LOG = LOG + self.to_JSON()
+        
+        # wrap up if done...
+        if self.checkmate or self.draw:
+            shout('game over, ' + self.current_team + ' team wins')
+            if LOGGING:
+                write_log()
+            raw_input('\nPress enter to close game...')
+            raise Exception('Game Finished')
+        elif self.check:
+            print('not checkmate, moves are possible.')
 
     def get_occupied(self):
         """Produce list of occupied cells and current teams, pieces."""
@@ -671,6 +688,13 @@ def cell_ref_to_pos(cell_ref):
     column B, row 6) into a [row, col] list e.g. 'E2' => [2, 5]."""
     return [int(cell_ref[1]), ord(cell_ref[0].upper())-ASCII_OFFSET]
 
+def write_log():
+    """write json log data to a file."""
+    file_obj = open(LOG_FILE_PATH, 'wb')
+    print('\nLogging game data...')
+    file_obj.writelines(LOG)
+    file_obj.close()
+
 def listsum(opperator='+', *args):
     """Perform an aggregation of lists by the opperator supplied e.g. 
     listsum('+'. [3, 6], [2, 2]) would return [5, 7]. The number of 
@@ -736,3 +760,10 @@ if __name__ == '__main__':
 ##        all possible moves had been pre-loaded (then just get moves for the 
 ##        piece they select) e.g.:
 ##http://stackoverflow.com/questions/7180914/pause-resume-a-python-script-in-middle
+##    - LOGGING needs to be fully written (lazy implementation at present)
+##    - 
+
+
+##  Bug:
+##    - prompt not re-prompting for invalid input
+##    - automated game - King seems to put itself in check with pawns 
