@@ -2,24 +2,18 @@
 """General utility functions / constants for python_chess"""
 LOG_FILE_PATH = 'log.json'
 ASCII_OFFSET = 64 # used to convert numbers to ascii letter codes
-VERBOSE = True
+VERBOSE = False 
 
 def pos_to_cell_ref(pos):
     """converts a [row, col] list into a cell reference where the
     cell is described as a letter for the column followed by a number 
     for the row e.g. [1, 1] becomes 'A1' or [4, 8] becomes 'H4'."""
-    return col_no_to_letter(pos[1])+str(pos[0])
-
-def col_no_to_letter(col_no):
-    return chr(col_no + ASCII_OFFSET)
+    return chr(pos[1]+ ASCII_OFFSET)+str(pos[0])
 
 def cell_ref_to_pos(cell_ref):
     """converts a cell_ref as given by the user (e.g. 'B6' to describe
     column B, row 6) into a [row, col] list e.g. 'E2' => [2, 5]."""
-    return [int(cell_ref[1]), col_letter_to_no(cell_ref[0])]
-
-def col_letter_to_no(col_letter):
-    return ord(col_letter.upper())-ASCII_OFFSET
+    return [int(cell_ref[1]), ord(cell_ref[0].upper())-ASCII_OFFSET]
 
 def write_log(log):
     """write json log data to a file."""

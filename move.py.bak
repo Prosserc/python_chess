@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """Called from python_chess.game"""
-from utils import pos_to_cell_ref, shout, VERBOSE
+from python_chess.utils import pos_to_cell_ref, shout, VERBOSE
 
 class Move(object):
     """

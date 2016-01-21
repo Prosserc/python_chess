@@ -1,21 +1,21 @@
 #!/usr/bin/python 
 """Python implementation of chess, main entry point."""
 import json
-from board import Board
-from piece import Piece
-from move import Move
+from python_chess.board import Board
+from python_chess.piece import Piece
+from python_chess.move import Move
 #from python_chess.chess_engine import pick_move
-from utils import (shout, write_log, cell_ref_to_pos,
+from python_chess.utils import (shout, write_log, cell_ref_to_pos, 
                                 pos_to_cell_ref, format_msg, VERBOSE)
 
 # constants
 LOGGING = False
 LOG = ''
-MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference " +
-    "for the piece want to move and the cell reference for the new location. " +
-    "The first two characters of your prompt entry are used to identify " +
+MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell referece " +
+    "for the piece want to move and the cell referece for the new location. " +
+    "The first two charcters of your prompt entry are used to identify " +
     "the current cell and the last two for the new cell e.g. to move from " +
-    "A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
+    "A7 to A5 you could enter 'A7, A5' or use shorthand of 'a7a5'.")
 
 
 class Game(object):
@@ -44,6 +44,16 @@ class Game(object):
                         1: {'A': 'wR1', 'B': 'wN1', 'C': 'wB1', 'D': 'wQ' , 
                             'E': 'wK' , 'F': 'wB2', 'G': 'wN2', 'H': 'wR2'}
                       }
+        # [
+        # [' ', 'A  ', 'B  ', 'C  ', 'D  ', 'E  ', 'F  ', 'G  ', 'H  '],
+        # ['8', 'br1', 'bk1', 'bb1', 'bQ' , 'bK' , 'bb2', 'bk2', 'br2'],
+        # ['7', 'bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8'],
+        # ['6', False, False, False, False, False, False, False, False],
+        # ['5', False, False, False, False, False, False, False, False],
+        # ['4', False, False, False, False, False, False, False, False],
+        # ['3', False, False, False, False, False, False, False, False],
+        # ['2', 'wp1', 'wp2', 'wp3', 'wp4', 'wp5', 'wp6', 'wp7', 'wp8'],
+        # ['1', 'wr1', 'wk1', 'wb1', 'wQ' , 'wK' , 'wb2', 'wk2', 'wr2']]
 
     move_dict = {'king':   [[1, 1], [1, 0], [1, -1], [0, 1],
                             [0, -1], [-1, 1], [-1, 0], [-1, -1]], 
@@ -93,7 +103,7 @@ class Game(object):
         the game object."""
         pieces = {}
 
-        for row, row_content in Game.START_POSITIONS.items():
+        for row, row_content in self.board.positions.items():
             if row > 0:
                 for col, piece_ref in row_content.items():
                     if piece_ref: 
@@ -106,7 +116,7 @@ class Game(object):
     def take_turn(self, team, prompt=None, move=None):
         """ Interact with player to facilitate moves, capture data and 
         identify/store information common to all potential moves.
-        Also includes optional param to specify a prompt to run
+        Also inlcudes optional param to specify a prompt to run 
         automatically or a move object (for interface from external
         scripts)."""
         global LOG
@@ -131,7 +141,7 @@ class Game(object):
                     if user_feedback: 
                         print(user_feedback + '\n')
                         user_feedback = None
-                    prompt = input("[" + team + " move] >> ")
+                    prompt = raw_input("[" + team + " move] >> ")
 
                 piece, up, right, found_issue, user_feedback = \
                    self.__parse_prompt(prompt, our_team)
@@ -161,7 +171,7 @@ class Game(object):
                 shout('game over, ' + self.current_team + ' team wins')
             if LOGGING:
                 write_log(LOG)
-            input('\nPress enter to close game...')
+            raw_input('\nPress enter to close game...')
             raise Exception('Game Finished')
 
     def __parse_prompt(self, prompt, our_team):
@@ -182,27 +192,26 @@ class Game(object):
 
         # attempt to get details of piece to be moved...
         #try:
-        # use first two characters as current cell_ref
+        # use first two charcters as current cell_ref
         [cur_rank, cur_file] = cell_ref_to_pos(prompt[:2])
         print("Calling get_piece_ref, passing in cur_rank: {0} and cur_file: {1}".format(cur_rank, cur_file))
         piece_ref = self.board.get_piece_ref(cur_rank, cur_file)
         piece = self.pieces[piece_ref]
         ## TMP ################
         print("tmp debugging info........................................")
-        print("piece_ref: {0} (should match piece.ref: {1})".format(piece_ref, piece.ref))
+        print("piece_ref: {0}".format(piece.ref))
         print("..........................................................")
         #######################
-        try:
         assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
-        except:
-            user_feedback = ('A piece in your team could not be found ' +
-                              'in cell: ' + prompt[:2] + '\n(using the ' +
-                              'first two characters from your entry)')
-            return None, None, None, True, user_feedback
+        #except:
+        #    user_feedback = ('A piece in your team could not be found ' +
+        #                      'in cell: ' + prompt[:2] + '\n(using the ' +
+        #                      'first two charchters from your entry)')
+        #    return None, None, None, True, user_feedback
 
         # attempt to get destination...
         try:
-            # use last two characters as new cell_ref
+            # use last two charcters as new cell_ref
             [new_rank, new_file] = cell_ref_to_pos(prompt[-2:])
             up, right = new_rank - cur_rank, new_file - cur_file
 
@@ -371,7 +380,7 @@ class Game(object):
                 print(self.pieces[ref].name.ljust(6) + 
                       (' (' + ref + ')').ljust(5) + ': ' + 
                       ', '.join([pos_to_cell_ref(obj.new_pos) for obj in moves]))
-            _ = input("Press enter to continue")
+            tmp = raw_input("Press enter to continue")
 
         return all_possible_moves, cnt
 
@@ -382,14 +391,15 @@ def main():
 
     # add set up func for 1/2 player options etc
     print(MOVE_INSTRUCTIONS)
-    #_ = input('\nPress enter to continue...')
+    tmp = raw_input('\nPress enter to continue...')
 
+    # tmp - will do in loop
     while not game.checkmate:
         game.take_turn('white')
         game.take_turn('black')
 
     # pause         
-    _ = input('\nPress enter to quit')
+    tmp = raw_input('\nPress enter to quit')
 
 if __name__ == '__main__':
     main()
@@ -413,12 +423,3 @@ if __name__ == '__main__':
 ##    - automated game - King seems to put itself in check with pawns (found
 ##      cause - game object is not updated after moves - need to make copies).
 ##    - option to draw board for automated game.
-
-
-
-## new comments:
-##   - need to split off all console related stuff (so that it uses some UI that provides
-##     some functions etc and console can be replaced with a GUI that provides the same..
-##     - parse prompt
-##     - print(board display) etc
-##     - take concept of positions away from board? (implement bitboard?)
