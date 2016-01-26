@@ -15,7 +15,7 @@ class Board(object):
         self.printable_positions.append(header_row)
         for row in sorted(pos.keys(), reverse=True):
             self.printable_positions.append([str(row)] +
-                                            [piece_ref for col, piece_ref in pos[row].items()])
+                                            [pos[row][col] for col in sorted(pos[row].keys())])
 
     def draw_board(self):
         """ASCII display showing the current state of the game."""
