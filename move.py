@@ -17,8 +17,8 @@ class Move(object):
         self.up = up
         self.right = right
         self.move = [up, right]
-        self.rank = piece.rank
-        self._file = piece._file
+        self.rank = piece.pos[0]
+        self._file = piece.pos[1]
         self.pos = piece.pos
         self.cell_ref = pos_to_cell_ref(self.pos)
         self.new_rank = self.rank + up

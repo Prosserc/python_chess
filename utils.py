@@ -29,7 +29,7 @@ def write_log(log):
     file_obj.close()
 
 def listagg(opperator='+', *args):
-    """Perform an aggregation of lists by the opperator supplied e.g. 
+    """Perform an aggregation of lists by the operator supplied e.g.
     listagg('+'. [3, 6], [2, 2]) would return [5, 7]. The number of 
     lists supplied is arbitrary, but each list must have the same 
     number of elements."""

@@ -4,3 +4,4 @@ __pycache__/
 
 # ignore sub directories not intended for repo
 plans/
+.idea/

@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/env python
 """Python implementation of chess, main entry point."""
 import json
 from board import Board
@@ -6,7 +6,7 @@ from piece import Piece
 from move import Move
 #from python_chess.chess_engine import pick_move
 from utils import (shout, write_log, cell_ref_to_pos,
-                                pos_to_cell_ref, format_msg, VERBOSE)
+                   pos_to_cell_ref, format_msg, VERBOSE)
 
 # constants
 LOGGING = False
@@ -193,7 +193,7 @@ class Game(object):
         print("..........................................................")
         #######################
         try:
-        assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
+            assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
         except:
             user_feedback = ('A piece in your team could not be found ' +
                               'in cell: ' + prompt[:2] + '\n(using the ' +
@@ -205,12 +205,6 @@ class Game(object):
             # use last two characters as new cell_ref
             [new_rank, new_file] = cell_ref_to_pos(prompt[-2:])
             up, right = new_rank - cur_rank, new_file - cur_file
-
-            # TMP ###############################################################
-            print('Up: {0}, Right: {1} (should be 2, 0)'.format(up, right))
-            print('cur_rank: {0}, cur_file: {1} (should be 2, 1)'.format(cur_rank, cur_file))
-            print('new_rank: {0}, new_file: {1} (should be 4, 1)'.format(new_rank, new_file))
-            #####################################################################
 
             if VERBOSE:
                 print('piece_ref: ' + piece.ref + ' | up: ' + str(up) + 
