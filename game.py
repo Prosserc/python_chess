@@ -25,7 +25,7 @@ class Game(object):
                    'B':'bishop', 'N': 'knight', 'p': 'pawn'}
     TEAMS = {'w': 'white', 'b': 'black'}
 
-    # describe piece positions by rank (row from botton up) and file (col)
+    # describe piece positions by rank (row from bottom up) and file (col)
     # used to instantiate Board and Piece classes
     START_POSITIONS = { 8: {'A': 'bR1', 'B': 'bN1', 'C': 'bB1', 'D': 'bQ' , 
                             'E': 'bK' , 'F': 'bB2', 'G': 'bN2', 'H': 'bR2'},
@@ -45,26 +45,14 @@ class Game(object):
                             'E': 'wK' , 'F': 'wB2', 'G': 'wN2', 'H': 'wR2'}
                       }
 
-    move_dict = {'king':   [[1, 1], [1, 0], [1, -1], [0, 1],
-                            [0, -1], [-1, 1], [-1, 0], [-1, -1]], 
-                 'rook':    [[i, 0] for i in range(1,9)] + \
-                            [[0, i] for i in range(1,9)] + \
-                            [[i*-1, 0] for i in range(1,9)] + \
-                            [[0, i*-1] for i in range(1,9)], 
-                 'bishop':  [[i, i] for i in range(1,9)] + \
-                            [[i, i*-1] for i in range(1,9)] + \
-                            [[i*-1, i] for i in range(1,9)] + \
-                            [[i*-1, i*-1] for i in range(1,9)],  
-                 'knight': [[2, 1], [2, -1], 
-                            [1, 2], [1, -2], 
-                            [-1, 2], [-1, -2], 
-                            [-2, 1], [-2, -1]], 
-                 'pawn':   [[1, 1, 'on_take'], 
-                            [1, -1, 'on_take'], 
-                            [1, 1, 'en_passant'], 
-                            [1, -1, 'en_passant'], 
-                            [1, 0], 
-                            [2, 0, 'on_first']]
+    move_dict = {'king':   [[i, j] for i in range(-1,2) for j in range(-1,2) if i != 0 or j != 0],
+                 'rook':   [[i, 0] for i in range(-8,9) if i != 0] +
+                           [[0, i] for i in range(-8,9) if i != 0],
+                 'bishop': [[i, i] for i in range(-8,9) if i != 0] +
+                           [[i, i*-1] for i in range(-8,9) if i != 0],
+                 'knight': [[i, j] for i in range(-2,3) for j in range(-2,3) if abs(i)+abs(j) == 3],
+                 'pawn':   [[1, i, msg] for i in [-1,1] for msg in ['on_take', 'en_passant']] +
+                           [[2, 0, 'on_first'], [1, 0]]
                  }
     move_dict['queen'] = move_dict['rook']+move_dict['bishop']
 
