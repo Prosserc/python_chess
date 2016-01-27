@@ -204,7 +204,6 @@ class Move(object):
         return 'okay'
 
 
-    @property
     def __king_safe(self):
         """
         Check if a move would put your king in check
@@ -237,8 +236,8 @@ class Move(object):
         # iterate through dictionary of their pieces creating theoretical moves
         # attempting to take king, if possible then move would put you in check.
         for ref, their_piece in self.their_team.items(): 
-            up = our_king.rank - their_piece.row
-            right = our_king._file - col_letter_to_no(their_piece.col)
+            up = our_king.row - their_piece.row
+            right = col_letter_to_no(our_king.col) - col_letter_to_no(their_piece.col)
             # reverse our_team and their team args to switch
             theoretical_move = Move(their_piece, up, right, self.occupied, 
                                     self.their_team, self.our_team, 
@@ -252,7 +251,7 @@ class Move(object):
             del theoretical_move
 
         # revert piece to original position
-        self.piece.row, self.piece.col = old_rank, col_letter_to_no(old_file)
+        self.piece.row, self.piece.col = old_rank, col_no_to_letter(old_file)
         self.piece.pos = old_pos
         self.occupied[self.occupied.index(self.new_pos)] = [old_rank, old_file]
         if self.take:

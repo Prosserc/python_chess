@@ -77,3 +77,12 @@ class Piece(object):
 
 if __name__ == '__main__':
     print(WRONG_ENTRY_POINT_MSG)
+
+
+# TODO - REVIEW:
+#  - consider whether storing row / col is the right thing? We do a lot of letter to no
+#    conversions and vice versa.
+#    Options
+#    - Just have rank and file (use properties to calc anything else?
+#    - Just have pos?
+#    - Move to bitboard to save memory (probably later)

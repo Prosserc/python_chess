@@ -7,8 +7,8 @@ from board import Board
 from piece import Piece
 from move import Move
 #from python_chess.chess_engine import pick_move
-from utils import (shout, write_log, cell_ref_to_pos,
-                   pos_to_cell_ref, format_msg, VERBOSE)
+from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
+                   col_letter_to_no, col_no_to_letter, format_msg, VERBOSE)
 
 # constants
 LOGGING = False
@@ -31,7 +31,7 @@ class Game(object):
 
     # describe piece positions by rank (row from bottom up) and file (col)
     # used to instantiate Board and Piece classes
-    START_POSITIONS = { 8: {'A': 'bR1', 'B': 'bN1', 'C': 'bB1', 'D': 'bQ' , 
+    START_POSITIONS = { 8: {'A': 'bR1', 'B': 'bN1', 'C': 'bB1', 'D': 'bQ' ,
                             'E': 'bK' , 'F': 'bB2', 'G': 'bN2', 'H': 'bR2'},
                         7: {'A': 'bp1', 'B': 'bp2', 'C': 'bp3', 'D': 'bp4', 
                             'E': 'bp5', 'F': 'bp6', 'G': 'bp7', 'H': 'bp8'},
@@ -45,17 +45,17 @@ class Game(object):
                             'E': False, 'F': False, 'G': False, 'H': False},
                         2: {'A': 'wp1', 'B': 'wp2', 'C': 'wp3', 'D': 'wp4', 
                             'E': 'wp5', 'F': 'wp6', 'G': 'wp7', 'H': 'wp8'},
-                        1: {'A': 'wR1', 'B': 'wN1', 'C': 'wB1', 'D': 'wQ' , 
+                        1: {'A': 'wR1', 'B': 'wN1', 'C': 'wB1', 'D': 'wQ' ,
                             'E': 'wK' , 'F': 'wB2', 'G': 'wN2', 'H': 'wR2'}
                       }
 
-    move_dict = {'king':   [[i, j] for i in range(-1,2) for j in range(-1,2) if i != 0 or j != 0],
-                 'rook':   [[i, 0] for i in range(-8,9) if i != 0] +
-                           [[0, i] for i in range(-8,9) if i != 0],
-                 'bishop': [[i, i] for i in range(-8,9) if i != 0] +
-                           [[i, i*-1] for i in range(-8,9) if i != 0],
-                 'knight': [[i, j] for i in range(-2,3) for j in range(-2,3) if abs(i)+abs(j) == 3],
-                 'pawn':   [[1, i, msg] for i in [-1,1] for msg in ['on_take', 'en_passant']] +
+    move_dict = {'king':   [[i, j] for i in range(-1, 2) for j in range(-1, 2) if i != 0 or j != 0],
+                 'rook':   [[i, 0] for i in range(-8, 9) if i != 0] +
+                           [[0, i] for i in range(-8, 9) if i != 0],
+                 'bishop': [[i, i] for i in range(-8, 9) if i != 0] +
+                           [[i, i*-1] for i in range(-8, 9) if i != 0],
+                 'knight': [[i, j] for i in range(-2, 3) for j in range(-2, 3) if abs(i)+abs(j) == 3],
+                 'pawn':   [[1, i, msg] for i in [-1, 1] for msg in ['on_take', 'en_passant']] +
                            [[2, 0, 'on_first'], [1, 0]]
                  }
     move_dict['queen'] = move_dict['rook']+move_dict['bishop']
@@ -252,8 +252,8 @@ class Game(object):
         occupied.remove(piece.pos)
         piece.move_cnt += 1
         piece.row += up
-        piece.col += right
-        piece.pos = [piece.row, piece.col]
+        piece.col = col_no_to_letter(col_letter_to_no(piece.col) + right)
+        piece.pos = [piece.row, col_letter_to_no(piece.col)]
         occupied.append(piece.pos)
 
         # check if anything was taken
@@ -302,7 +302,8 @@ class Game(object):
         # work out move required to get to their king
         their_king = (self.pieces['wK'] if self.current_team == 'black' 
                       else self.pieces['bK'])
-        up, right = their_king.row - piece.row, their_king.col - piece.col
+        up = their_king.row - piece.row
+        right = col_letter_to_no(their_king.col) - col_letter_to_no(piece.col)
         if VERBOSE:
             print('..possible to move ' + piece.ref + ' from ' + 
                   str(piece.pos) + ' to ' + str(their_king.pos) + '?')

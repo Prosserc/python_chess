@@ -95,10 +95,15 @@ class Board(object):
         """
         Reflect a successful move on the board positions.
         """
-        old_rank, new_rank = old_pos[1], new_pos[1]
-        old_file, new_file = old_pos[0], new_pos[0]
+        old_rank, new_rank = old_pos[0], new_pos[0]
+        old_file, new_file = old_pos[1], new_pos[1]
         self.positions[old_rank][old_file] = False
         self.positions[new_rank][new_file] = piece_ref
+        self.printable_positions[9-old_rank][old_file] = False
+        self.printable_positions[9-new_rank][new_file] = piece_ref
+
+        ## todo cleanup:
+        ## - this is messed up, need to think of a better solution that printable_pos...
 
 
 if __name__ == '__main__':
