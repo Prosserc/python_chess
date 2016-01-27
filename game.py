@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-"""Python implementation of chess, main entry point."""
+"""
+Python implementation of chess, main entry point.
+"""
 import json
 from board import Board
 from piece import Piece
@@ -19,8 +21,10 @@ MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference " +
 
 
 class Game(object):
-    """Top level class, the game object contains all of the other 
-    class instances such as the pieces, the board etc."""
+    """
+    Top level class, the game object contains all of the other
+    class instances such as the pieces, the board etc.
+    """
     PIECE_CODES = {'K': 'king', 'Q': 'queen', 'R':'rook',
                    'B':'bishop', 'N': 'knight', 'p': 'pawn'}
     TEAMS = {'w': 'white', 'b': 'black'}
@@ -56,8 +60,11 @@ class Game(object):
                  }
     move_dict['queen'] = move_dict['rook']+move_dict['bishop']
 
+
     def __init__(self):
-        """Initialise game object and create required member objects"""
+        """
+        Initialise game object and create required member objects
+        """
                      
         self.board = Board(Game.START_POSITIONS)
         self.pieces = self.__create_pieces(Game.move_dict)
@@ -69,16 +76,22 @@ class Game(object):
         self.turns = 0
         self.current_team = None
 
+
     def __to_JSON(self):
-        """Output entire object contents as json."""
+        """
+        Output entire object contents as json.
+        """
         return json.dumps(self, default=lambda o: o.__dict__, 
                           sort_keys=True, indent=4)
 
+
     def __create_pieces(self, move_dict):
-        """Creates a object for each piece and creates a dictionary to 
+        """
+        Creates a object for each piece and creates a dictionary to
         enable access to the pieces via their ref. 
         The source of this data and the refs is the positions list, in 
-        the game object."""
+        the game object.
+        """
         pieces = {}
 
         for row, row_content in Game.START_POSITIONS.items():
@@ -91,12 +104,15 @@ class Game(object):
                                                   row, col, move_dict)
         return pieces
 
+
     def take_turn(self, team, prompt=None, move=None):
-        """ Interact with player to facilitate moves, capture data and 
+        """
+        Interact with player to facilitate moves, capture data and
         identify/store information common to all potential moves.
         Also includes optional param to specify a prompt to run
         automatically or a move object (for interface from external
-        scripts)."""
+        scripts).
+        """
         global LOG
         self.turns += 1
         self.current_team = team
@@ -152,8 +168,11 @@ class Game(object):
             input('\nPress enter to close game...')
             raise Exception('Game Finished')
 
+
     def __parse_prompt(self, prompt, our_team):
-        """Determine piece to be moved and move required from prompt."""
+        """
+        Determine piece to be moved and move required from prompt.
+        """
         global VERBOSE
 
         # first check for special commands
@@ -205,8 +224,11 @@ class Game(object):
 
         return piece, up, right, False, None
 
+
     def get_occupied(self):
-        """Produce list of occupied cells and current teams, pieces."""
+        """
+        Produce list of occupied cells and current teams, pieces.
+        """
         occupied, our_team, their_team = [], {}, {}
         # iterate through piece objects in pieces dictionary
         for ref, piece in self.pieces.items():
@@ -219,8 +241,11 @@ class Game(object):
                     their_team[ref] = piece
         return occupied, our_team, their_team
 
+
     def __process_move(self, piece, move, up, right, occupied, our_team, their_team):
-        """Execute and updates required as a result of a valid move."""
+        """
+        Execute and updates required as a result of a valid move.
+        """
         # update piece attributes
         occupied.remove(piece.pos)
         piece.move_cnt += 1
@@ -261,11 +286,14 @@ class Game(object):
             # other player in checkmate?
             self.checkmate = self.__in_checkmate(occupied, our_team, their_team)
 
+
     def __in_check(self, piece, occupied, our_team, their_team):
-        """Determine whether the opponent's king is in check, done by 
+        """
+        Determine whether the opponent's king is in check, done by
         creating a theoretical_move from the attaching piece's current 
         position to their King's position to see if the move would be 
-        valid."""
+        valid.
+        """
         if VERBOSE:
             print('Checking if other player is in check...')
 
@@ -285,11 +313,14 @@ class Game(object):
                 print('..invalid_reason: ' + theoretical_move.invalid_reason)
             return False
 
+
     def __in_checkmate(self, occupied, our_team, their_team):
-        """Determine whether the opponents king is in checkmate, done 
+        """
+        Determine whether the opponents king is in checkmate, done
         by creating many theoretical moves for each piece on the  
         opponents team to see if any are valid i.e. end with their 
-        king not in check."""
+        king not in check.
+        """
         for ref, piece in their_team.items():
             # call one piece at a time to stop after first piece found with
             # possible moves
@@ -307,10 +338,12 @@ class Game(object):
                 return False
         return True
 
+
     def get_all_possible_moves(self, occupied=None, our_team=None, 
                                their_team=None, pieces=None,
                                list_moves=False, team=None):
-        """Try all of the valid moves for the pieces passed in, pieces 
+        """
+        Try all of the valid moves for the pieces passed in, pieces
         arg should be a dictionary of piece objects with piece_ref as 
         their key. Return a dictionary with same keys, where value is 
         a list containing a move objects for each possible move for 
@@ -318,7 +351,8 @@ class Game(object):
         If occupied, our_team or their_team are not supplied a new call
         is made to self.get_occupied.
         If pieces is not supplied this is defaulted to our_team.
-        Team param is picked up from game object when not supplied."""
+        Team param is picked up from game object when not supplied.
+        """
         # get defaults if args missing
         if not team:
             team = self.current_team
@@ -359,7 +393,9 @@ class Game(object):
 
 
 def main():
-    """Main entry point for program"""
+    """
+    Main entry point for program
+    """
     game = Game() # create game object as new instance of Game class
 
     # add set up func for 1/2 player options etc
@@ -372,6 +408,7 @@ def main():
 
     # pause         
     _ = input('\nPress enter to quit')
+
 
 if __name__ == '__main__':
     main()

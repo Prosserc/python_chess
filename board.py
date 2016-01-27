@@ -1,14 +1,23 @@
-#!/usr/bin/python
-"""Called from python_chess.game. This version is used for ASCII mode."""
+#!/usr/bin/env python
+"""
+Called from python_chess.game. This version is used for ASCII mode.
+"""
 from utils import VERBOSE, col_no_to_letter
 
+
 class Board(object):
-    """Used to represent the current state of play, record all 
+    """
+    Used to represent the current state of play, record all
     current positions and interacts with display. The display is 
     intended to be logically separate from the rest of the game so 
-    that the user interface can be replaced as required."""
+    that the user interface can be replaced as required.
+    """
+
+
     def __init__(self, pos):
-        """Create board display based on game.positions passed in."""
+        """
+        Create board display based on game.positions passed in.
+        """
         self.positions = pos
         self.printable_positions = []
         header_row = [' '] + [col_head.ljust(3) for col_head in sorted(pos[1].keys())]
@@ -17,8 +26,11 @@ class Board(object):
             self.printable_positions.append([str(row)] +
                                             [pos[row][col] for col in sorted(pos[row].keys())])
 
+
     def draw_board(self):
-        """ASCII display showing the current state of the game."""
+        """
+        ASCII display showing the current state of the game.
+        """
         rows = cols = range(9)
         row_height, col_width, head_width = 4, 9, 5
         width = (len(cols[1:]) * col_width) + head_width + 1 # +1 for boarders
@@ -65,8 +77,11 @@ class Board(object):
 
         return display
 
+
     def get_piece_ref(self, rank, _file):
-        """Get a piece object from the positions list."""
+        """
+        Get a piece object from the positions list.
+        """
         # ranks in chess start from 1 at bottom, adjust for reverse in positions
         print("In get_piece_ref, rank set to: {0}, _file set to: {1}".format(rank, _file)) #TMP
         row = rank
@@ -75,12 +90,16 @@ class Board(object):
         if VERBOSE: print("self.positions[row][col] set to {0}".format(self.positions[row][col]))
         return self.positions[row][col]   
 
+
     def update_board(self, old_pos, new_pos, piece_ref):
-        """Reflect a successful move on the board positions."""
+        """
+        Reflect a successful move on the board positions.
+        """
         old_rank, new_rank = old_pos[1], new_pos[1]
         old_file, new_file = old_pos[0], new_pos[0]
         self.positions[old_rank][old_file] = False
         self.positions[new_rank][new_file] = piece_ref
+
 
 if __name__ == '__main__':
     print("This module is not intended to be the main entry point for the " +

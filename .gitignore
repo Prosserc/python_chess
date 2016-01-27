@@ -3,5 +3,5 @@ __pycache__/
 *.py[cod]
 
 # ignore sub directories not intended for repo
-plans/
-.idea/
+*plans/
+*.idea/

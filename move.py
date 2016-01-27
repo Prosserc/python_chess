@@ -1,12 +1,16 @@
-#!/usr/bin/python
-"""Called from python_chess.game"""
-from utils import pos_to_cell_ref, shout, VERBOSE
+#!/usr/bin/env python
+"""
+Called from python_chess.game
+"""
+from utils import pos_to_cell_ref, col_no_to_letter, col_letter_to_no, shout, VERBOSE
 
 class Move(object):
     """
     Capture characteristics of actual or potential moves e.g. amount 
     to go up and right, new rank/_file etc. for easy comparison. 
     """
+
+
     def __init__(self, piece, up, right, occupied, our_team, their_team,
                  theoretical_move=False, stop_recursion=False):
         """
@@ -48,8 +52,11 @@ class Move(object):
             if VERBOSE and not self.theoretical_move: 
                 shout('move allowed')
 
+
     def check_move(self):
-        """Run checks to see whether a move is possible."""
+        """
+        Run checks to see whether a move is possible.
+        """
         filters = [self.__valid_for_piece,
                    self.__within_boundaries,
                    self.__path_clear,
@@ -65,8 +72,11 @@ class Move(object):
 
         return True, None
 
+
     def __valid_for_piece(self):
-        """Check move against piece.valid_moves"""
+        """
+        Check move against piece.valid_moves
+        """
         invalid_msg = 'Move is not allowed for this piece.'
         if VERBOSE and not self.theoretical_move:
             print(str(self.move) + ' in ' + 
@@ -75,16 +85,22 @@ class Move(object):
             return 'okay'
         return invalid_msg
 
+
     def __within_boundaries(self):
-        """Check if move is possible within board boundaries"""
+        """
+        Check if move is possible within board boundaries
+        """
         invalid_msg = ('Move is not allowed as it would go outside of ' +
                        'the board boundaries to: ' + self.new_cell_ref)
         if self.new_rank in range(1, 9) and self.new_file in range(1, 9):
             return 'okay'
         return invalid_msg
 
+
     def __path_clear(self):
-        """Check if move is blocked by another piece"""
+        """
+        Check if move is blocked by another piece
+        """
         def distance(pos1, pos2):
             """Calculate the distance between two sets of coordinates."""
             return sum([abs(pos2[i] - pos1[i]) for i in range(len(pos1))])
@@ -151,10 +167,13 @@ class Move(object):
 
         return 'okay'
 
+
     def __conditions_satisfied(self):
-        """Check if all conditions stored for the move are satisfied. 
-        The conditions are identified when the piece is created e.g. a 
-        pawn only being able to move diagonally if taking."""
+        """
+        Check if all conditions stored for the move are satisfied.
+        The conditions are identified when the piece is created e.g. a
+        pawn only being able to move diagonally if taking.
+        """
         ind = [i[:2] for i in self.piece.valid_moves].index(self.move)
         try:
             conditions = self.piece.valid_moves[ind][2:]
@@ -182,8 +201,12 @@ class Move(object):
                 return invalid_msg
         return 'okay'
 
+
+    @property
     def __king_safe(self):
-        """Check if a move would put your king in check"""
+        """
+        Check if a move would put your king in check
+        """
         # define base case as the move object is created recursively below
         invalid_msg = None
         if self.stop_recursion:
@@ -193,7 +216,7 @@ class Move(object):
         # moves checked below will recognise the new position (i.e. as if you had
         # made the move).
         old_rank, old_file, old_pos = self.rank, self._file, self.pos # copy for reverting
-        self.piece.rank, self.piece._file = self.new_rank, self.new_file
+        self.piece.row, self.piece.col = self.new_rank, col_no_to_letter(self.new_file)
         self.piece.pos = self.new_pos 
         if self.take:
             take_ref = [ref for ref in self.their_team.keys() 
@@ -212,8 +235,8 @@ class Move(object):
         # iterate through dictionary of their pieces creating theoretical moves
         # attempting to take king, if possible then move would put you in check.
         for ref, their_piece in self.their_team.items(): 
-            up = our_king.rank - their_piece.rank
-            right = our_king._file - their_piece._file
+            up = our_king.rank - their_piece.row
+            right = our_king._file - col_letter_to_no(their_piece.col)
             # reverse our_team and their team args to switch
             theoretical_move = Move(their_piece, up, right, self.occupied, 
                                     self.their_team, self.our_team, 
@@ -227,10 +250,11 @@ class Move(object):
             del theoretical_move
 
         # revert piece to original position
-        self.piece.rank, self.piece._file, self.piece.pos = old_rank, old_file, old_pos
+        self.piece.row, self.piece.col = old_rank, col_letter_to_no(old_file)
+        self.piece.pos = old_pos
         self.occupied[self.occupied.index(self.new_pos)] = [old_rank, old_file]
         if self.take:
-            self.occupied.append(self.new_pos) # re-instate taken piece
+            self.occupied.append(self.new_pos)  # re-instate taken piece
             if taken_piece.name != 'king':
                 self.their_team[take_ref] = taken_piece
 
@@ -239,16 +263,20 @@ class Move(object):
             return 'okay'
         return invalid_msg
 
+
     def generate_id(self):
-        """Generate unique moveID based on piece_ref being moved and 
-        position of every other piece."""
+        """
+        Generate unique moveID based on piece_ref being moved and
+        position of every other piece.
+        """
         # Error - new/old showing as same
         _id = ('mv:' + self.piece.ref + "-" + str(self.rank*self._file) + "-" + 
                str(self.new_rank*self.new_file) + ",oth:") 
-        for piece_ref, piece in self.their_team.items():
-            if not piece.taken and piece_ref != self.piece.ref:
-                _id = '+'.join([_id, (piece_ref + '-' + str(piece.rank*piece._file))])
+        for ref, piece in self.their_team.items():
+            if not piece.taken and ref != self.piece.ref:
+                _id = '+'.join([_id, (ref + '-' + str(piece.row*col_letter_to_no(piece.col)))])
         return _id
+
 
 if __name__ == '__main__':
     print("This module is not intended to be the main entry point for the " +
