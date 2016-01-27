@@ -4,7 +4,7 @@ Unit test for chess.py - an automated game. As AI is not yet built
 these will be purely random moves with no intelligence, but will serve
 as a good test it will cover a broad array of pieces / moves.
 """
-from game import Game
+# from game import Game
 from utils import WRONG_ENTRY_POINT_MSG
 from random import random as rnd
 from copy import deepcopy
@@ -19,7 +19,7 @@ def __pick_rnd(lst, cnt=None):
     """
     if not cnt:
         cnt = len(lst)
-    i = int(rnd()*(cnt-1)) # -1 needed to allow for zero based indexing
+    i = int(rnd() * (cnt - 1))  # -1 needed to allow for zero based indexing
     return lst[i]
 
 
@@ -40,7 +40,7 @@ def __game_state(game, team):
     Asses the values of pieces on the current team relative to the
     the value of pieces on the other team.
     """
-    pass # to follow
+    pass  # to follow
 
 
 def __next_move(game_branch, team):
@@ -49,17 +49,17 @@ def __next_move(game_branch, team):
     best take available (if one is available).
     """
     raise Exception("Not implemented yet")
-    #obj_list.append(move_obj)
-    #if move_obj.take:
-    #    take_ref = \
-    #       game_branch.board.positions[move_obj.new_row][move_obj.new_col]
-    #    points = piece_vals[game_branch.pieces[take_ref].name]
-    #    if points > max_points:
-    #        max_points, selected_move = points, move_obj
+    # obj_list.append(move_obj)
+    # if move_obj.take:
+    #     take_ref = \
+    #        game_branch.board.positions[move_obj.new_row][move_obj.new_col]
+    #     points = piece_vals[game_branch.pieces[take_ref].name]
+    #     if points > max_points:
+    #         max_points, selected_move = points, move_obj
 
-    #if max_points == 0:
-    #    selected_move = __pick_rnd(obj_list, cnt)
-    #return selected_move
+    # if max_points == 0:
+    #     selected_move = __pick_rnd(obj_list, cnt)
+    # return selected_move
 
 
 def pick_move(game, team, level):
@@ -73,8 +73,8 @@ def pick_move(game, team, level):
         return __random_move(game, team)
     max_points, obj_list = 0, []
 
-    for l in range(1,level+1):
-        if l ==1:
+    for l in range(1, level+1):
+        if l == 1:
             branch = deepcopy(game)
         
         move_dict, cnt = branch.get_all_possible_moves(team=team)

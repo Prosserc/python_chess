@@ -24,7 +24,6 @@ class Piece(object):
         self.col = col
         self.pos = [int(row), col_letter_to_no(col)]
         self.valid_moves = self.get_valid_moves(move_dict)
-        self.largest = max([max([abs(i) for i in j[:2]]) for j in self.valid_moves])
         self.move_cnt = 0
         self.taken = False
 
@@ -36,7 +35,7 @@ class Piece(object):
             self.one_space_moves = self.get_one_space_moves()
 
 
-    def __to_JSON(self):
+    def __to_json(self):
         """
         Output entire object contents as json.
         """

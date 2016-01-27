@@ -17,9 +17,9 @@ class Move(object):
                  theoretical_move=False, stop_recursion=False):
         """
         Define move attributes, determine if move is possible and the 
-        outcomes reslting from the move or an invalid_reason.
+        outcomes resulting from the move or an invalid_reason.
         """
-        self.piece = piece # store piece object against move
+        self.piece = piece  # store piece object against move
         self.up = up
         self.right = right
         self.move = [up, right]
@@ -34,7 +34,7 @@ class Move(object):
         self.occupied = occupied
         self.our_team = our_team
         self.their_team = their_team
-        #self._id = self.__generate_id() # REVIEW - Needed?
+        # self._id = self.__generate_id() # REVIEW - Needed?
         self.our_team_cells = [our_team[piece_ref].pos 
                                for piece_ref in our_team]
         self.their_team_cells = [their_team[piece_ref].pos 
@@ -103,10 +103,8 @@ class Move(object):
         """
         Check if move is blocked by another piece
         """
-        def distance(pos1, pos2):
-            """Calculate the distance between two sets of coordinates."""
-            return sum([abs(pos2[i] - pos1[i]) for i in range(len(pos1))])
-        MAX_STEPS = 8
+        distance = lambda pos1, pos2: sum([abs(pos2[i] - pos1[i]) for i in range(len(pos1))])
+        max_steps = 8
         current_step = 0
 
         # take steps by taking min distance to destination after each
@@ -117,10 +115,10 @@ class Move(object):
             tmp_pos = self.pos
             while tmp_pos != self.new_pos:
                 # get all possible destination cells after a one space step
-                poss_steps = [[i[0] + tmp_pos[0], i[1] + tmp_pos[1]]
-                              for i in self.piece.one_space_moves
-                              if i[0] + tmp_pos[0] in range(1, 9) and
-                                 i[1] + tmp_pos[1] in range(1, 9)]
+                poss_steps = [
+                    [tmp_pos[0] + up, tmp_pos[1] + right]
+                    for up, right in self.piece.one_space_moves
+                    if tmp_pos[0] + up in range(1, 9) and tmp_pos[1] + right in range(1, 9)]
                 if VERBOSE and not self.theoretical_move:
                     print('Possible steps: ' + ', '.join(str(i) for i in poss_steps))
 
@@ -155,14 +153,14 @@ class Move(object):
                         self.take = True
 
                 current_step += 1
-                if current_step >= MAX_STEPS:
+                if current_step >= max_steps:
                     break
 
         # allow for knights
         else: 
             if self.new_pos in self.our_team_cells:
-                invalid_msg = ('This move is blocked as ' + 
-                                self.new_cell_ref + ' is occupied.')
+                invalid_msg = ('This move is blocked as ' + self.new_cell_ref +
+                               ' is occupied by your team.')
                 return invalid_msg
             elif self.new_pos in self.their_team_cells:
                 self.take = True
@@ -180,7 +178,7 @@ class Move(object):
         try:
             conditions = self.piece.valid_moves[ind][2:]
         except IndexError:
-            return 'okay' # no conditions on move
+            return 'okay'  # no conditions on move
 
         for cond in conditions:
             if VERBOSE and not self.theoretical_move:
@@ -196,7 +194,7 @@ class Move(object):
                     invalid_msg = 'A pawn can only move diagonally when taking.'
                     return invalid_msg
                 else:
-                    self.piece.valid_moves.remove(self.move+[cond])
+                    self.piece.valid_moves.remove(self.move + [cond])
             #   T O   F O L L O W . . .
             elif cond == 'en_passant':
                 invalid_msg = "Sorry " + cond + " rule not coded yet."
@@ -216,12 +214,12 @@ class Move(object):
         # need to temporarily update piece object, so that all of the theoretical
         # moves checked below will recognise the new position (i.e. as if you had
         # made the move).
-        old_rank, old_file, old_pos = self.rank, self._file, self.pos # copy for reverting
+        old_rank, old_file, old_pos = self.rank, self._file, self.pos  # copy for reverting
         self.piece.row, self.piece.col = self.new_rank, col_no_to_letter(self.new_file)
         self.piece.pos = self.new_pos 
         if self.take:
             take_ref = [ref for ref in self.their_team.keys() 
-                         if self.their_team[ref].pos == self.new_pos][0]
+                        if self.their_team[ref].pos == self.new_pos][0]
             taken_piece = self.their_team[take_ref]
             if taken_piece.name != 'king':
                 del self.their_team[take_ref]
@@ -272,15 +270,14 @@ class Move(object):
         Generate unique moveID based on piece_ref being moved and
         position of every other piece.
         """
-        # Error - new/old showing as same
-        _id = ('mv:' + self.piece.ref + "-" + str(self.rank*self._file) + "-" + 
-               str(self.new_rank*self.new_file) + ",oth:") 
+        # fix - new/old showing as same
+        _id = ('mv:' + self.piece.ref + "-" + str(self.rank * self._file) + "-" +
+               str(self.new_rank * self.new_file) + ",oth:")
         for ref, piece in self.their_team.items():
             if not piece.taken and ref != self.piece.ref:
-                _id = '+'.join([_id, (ref + '-' + str(piece.row*col_letter_to_no(piece.col)))])
+                _id = '+'.join([_id, (ref + '-' + str(piece.row * col_letter_to_no(piece.col)))])
         return _id
 
 
 if __name__ == '__main__':
     print(WRONG_ENTRY_POINT_MSG)
-        

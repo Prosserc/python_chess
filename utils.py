@@ -3,7 +3,7 @@
 General utility functions / constants for python_chess
 """
 LOG_FILE_PATH = 'log.json'
-ASCII_OFFSET = 64 # used to convert numbers to ascii letter codes
+ASCII_OFFSET = 64  # used to convert numbers to ascii letter codes
 VERBOSE = False
 WRONG_ENTRY_POINT_MSG = "This module is not intended to be the main entry point for the" + \
                         "program, call python_chess.game to start a new game."
@@ -15,7 +15,7 @@ def pos_to_cell_ref(pos):
     cell is described as a letter for the column followed by a number 
     for the row e.g. [1, 1] becomes 'A1' or [4, 8] becomes 'H4'.
     """
-    return col_no_to_letter(pos[1])+str(pos[0])
+    return col_no_to_letter(pos[1]) + str(pos[0])
 
 
 def col_no_to_letter(col_no):
@@ -31,7 +31,7 @@ def cell_ref_to_pos(cell_ref):
 
 
 def col_letter_to_no(col_letter):
-    return ord(col_letter.upper())-ASCII_OFFSET
+    return ord(col_letter.upper()) - ASCII_OFFSET
 
 
 def write_log(log):
@@ -44,10 +44,10 @@ def write_log(log):
     file_obj.close()
 
 
-def listagg(opperator='+', *args):
+def list_agg(operator='+', *args):
     """
     Perform an aggregation of lists by the operator supplied e.g.
-    listagg('+'. [3, 6], [2, 2]) would return [5, 7]. The number of 
+    list_agg('+'. [3, 6], [2, 2]) would return [5, 7]. The number of
     lists supplied is arbitrary, but each list must have the same 
     number of elements.
     """
@@ -55,9 +55,9 @@ def listagg(opperator='+', *args):
     res = args[0]
     for i, arg in enumerate(args[1:]):
         if len(arg) != l:
-            raise Exception("The length of all arguements must be the same")
+            raise Exception("The length of all arguments must be the same")
         for j, item in enumerate(arg):
-            cmd = "res[j] " + opperator + "= " + str(item)
+            cmd = "res[j] " + operator + "= " + str(item)
             exec(cmd)
     return res
 
@@ -66,7 +66,7 @@ def shout(msg, suffix=' !!!', print_output=True, return_output=False):
     """
     Output message in all caps with spaces between and a suffix.
     """
-    adj_msg = ' '.join([str(i).upper() for i in str(msg)+str(suffix)])
+    adj_msg = ' '.join([str(i).upper() for i in str(msg) + str(suffix)])
     if print_output:
         print(adj_msg)
     if return_output:

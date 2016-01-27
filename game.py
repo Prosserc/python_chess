@@ -6,18 +6,17 @@ import json
 from board import Board
 from piece import Piece
 from move import Move
-#from chess_engine import pick_move
+# from chess_engine import pick_move
 from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
                    col_letter_to_no, col_no_to_letter, format_msg, VERBOSE)
 
 # constants
 LOGGING = False
 LOG = ''
-MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference " +
-    "for the piece want to move and the cell reference for the new location. " +
-    "The first two characters of your prompt entry are used to identify " +
-    "the current cell and the last two for the new cell e.g. to move from " +
-    "A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
+MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for the piece you "
+        "want to move and the cell reference for the new location. The first two characters of "
+        "your prompt entry are used to identify the current cell and the last two for the new "
+        "cell e.g. to move from A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
 
 
 class Game(object):
@@ -343,7 +342,7 @@ class Game(object):
         Try all of the valid moves for the pieces passed in, pieces
         arg should be a dictionary of piece objects with piece_ref as 
         their key. Return a dictionary with same keys, where value is 
-        a list containing a move objects for each possible move for 
+        a list containing a move object for each possible move for
         that piece (can be[]).
         If occupied, our_team or their_team are not supplied a new call
         is made to self.get_occupied.
@@ -378,6 +377,7 @@ class Game(object):
                     all_possible_moves[ref].append(theoretical_move)
                     cnt += 1
                 del theoretical_move
+
         if list_moves:
             print('\nPossible moves:') 
             for ref, moves in iter(sorted(all_possible_moves.items())):
