@@ -6,7 +6,7 @@ import json
 from board import Board
 from piece import Piece
 from move import Move
-#from python_chess.chess_engine import pick_move
+#from chess_engine import pick_move
 from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
                    col_letter_to_no, col_no_to_letter, format_msg, VERBOSE)
 
@@ -189,17 +189,11 @@ class Game(object):
             return None, None, None, True, None           
 
         # attempt to get details of piece to be moved...
-        #try:
         # use first two characters as current cell_ref
         [cur_rank, cur_file] = cell_ref_to_pos(prompt[:2])
-        print("Calling get_piece_ref, passing in cur_rank: {0} and cur_file: {1}".format(cur_rank, cur_file))
         piece_ref = self.board.get_piece_ref(cur_rank, cur_file)
         piece = self.pieces[piece_ref]
-        ## TMP ################
-        print("tmp debugging info........................................")
-        print("piece_ref: {0} (should match piece.ref: {1})".format(piece_ref, piece.ref))
-        print("..........................................................")
-        #######################
+        
         try:
             assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
         except:
