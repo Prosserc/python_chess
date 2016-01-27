@@ -3,7 +3,8 @@
 Called from python_chess.game
 """
 import json
-from utils import col_letter_to_no
+from utils import col_letter_to_no, WRONG_ENTRY_POINT_MSG
+
 
 class Piece(object):
     """
@@ -75,5 +76,4 @@ class Piece(object):
 
 
 if __name__ == '__main__':
-    print("This module is not intended to be the main entry point for the " +
-          "program, call python_chess.game to start a new game.")
+    print(WRONG_ENTRY_POINT_MSG)

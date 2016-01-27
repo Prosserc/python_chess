@@ -2,7 +2,9 @@
 """
 Called from python_chess.game
 """
-from utils import pos_to_cell_ref, col_no_to_letter, col_letter_to_no, shout, VERBOSE
+from utils import (pos_to_cell_ref, col_no_to_letter, col_letter_to_no, shout,
+                   VERBOSE, WRONG_ENTRY_POINT_MSG)
+
 
 class Move(object):
     """
@@ -246,7 +248,7 @@ class Move(object):
                 invalid_msg = ('You cannot move to this space as it would put ' +
                                'your king in check with the ' + their_piece.name +
                                ' in cell ' + pos_to_cell_ref(theoretical_move.pos))
-                break # cannot return here as need to revert position etc.
+                break  # cannot return here as need to revert position etc.
             del theoretical_move
 
         # revert piece to original position
@@ -255,7 +257,9 @@ class Move(object):
         self.occupied[self.occupied.index(self.new_pos)] = [old_rank, old_file]
         if self.take:
             self.occupied.append(self.new_pos)  # re-instate taken piece
+            # noinspection PyUnboundLocalVariable
             if taken_piece.name != 'king':
+                # noinspection PyUnboundLocalVariable
                 self.their_team[take_ref] = taken_piece
 
 
@@ -279,6 +283,5 @@ class Move(object):
 
 
 if __name__ == '__main__':
-    print("This module is not intended to be the main entry point for the " +
-          "program, call python_chess.game to start a new game.")
+    print(WRONG_ENTRY_POINT_MSG)
         

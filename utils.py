@@ -5,6 +5,8 @@ General utility functions / constants for python_chess
 LOG_FILE_PATH = 'log.json'
 ASCII_OFFSET = 64 # used to convert numbers to ascii letter codes
 VERBOSE = True
+WRONG_ENTRY_POINT_MSG = "This module is not intended to be the main entry point for the" + \
+                        "program, call python_chess.game to start a new game."
 
 
 def pos_to_cell_ref(pos):
@@ -87,5 +89,4 @@ def format_msg(msg, line_width=80):
 
 
 if __name__ == '__main__':
-    print("This module is not intended to be the main entry point for the " +
-          "program, call python_chess.game to start a new game.")
+    print(WRONG_ENTRY_POINT_MSG)

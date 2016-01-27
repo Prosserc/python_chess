@@ -151,11 +151,12 @@ class Game(object):
 
             prompt = None # clear ready for next loop
 
+        # noinspection PyUnboundLocalVariable
         self.__process_move(piece, move, up, right, occupied, our_team, their_team)
 
         # log state of game
         if LOGGING:
-            LOG = '\n'.join(LOG, self.__to_JSON())
+            LOG = '\n'.join([LOG, self.__to_JSON()])
 
         # wrap up if done...
         if self.checkmate or self.turns >= 200: ## TODO (see below)
@@ -247,6 +248,7 @@ class Game(object):
         Execute and updates required as a result of a valid move.
         """
         # update piece attributes
+        global taken_piece
         occupied.remove(piece.pos)
         piece.move_cnt += 1
         piece.row += up

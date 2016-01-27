@@ -2,7 +2,7 @@
 """
 Called from python_chess.game. This version is used for ASCII mode.
 """
-from utils import VERBOSE, col_no_to_letter
+from utils import VERBOSE, col_no_to_letter, WRONG_ENTRY_POINT_MSG
 
 
 class Board(object):
@@ -102,5 +102,4 @@ class Board(object):
 
 
 if __name__ == '__main__':
-    print("This module is not intended to be the main entry point for the " +
-          "program, call python_chess.game to start a new game.")
+    print(WRONG_ENTRY_POINT_MSG)

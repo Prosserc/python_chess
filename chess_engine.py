@@ -4,7 +4,8 @@ Unit test for chess.py - an automated game. As AI is not yet built
 these will be purely random moves with no intelligence, but will serve
 as a good test it will cover a broad array of pieces / moves.
 """
-from python_chess.game import Game
+from game import Game
+from utils import WRONG_ENTRY_POINT_MSG
 from random import random as rnd
 from copy import deepcopy
 
@@ -86,5 +87,4 @@ def pick_move(game, team, level):
 
 
 if __name__ == '__main__':
-    print("This module is not intended to be the main entry point for the " +
-          "program, call python_chess.game to start a new game.")
+    print(WRONG_ENTRY_POINT_MSG)
