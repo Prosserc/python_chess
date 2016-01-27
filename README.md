@@ -7,13 +7,14 @@ I am initially working on a basic text based chess game in python. Once I have f
 Example Board:
 -------------
 
-<a href="http://tinypic.com?ref=2ro5pqo" target="_blank"><img src="http://i60.tinypic.com/2ro5pqo.png" border="0" alt="Image and video hosting by TinyPic"></a>
+<a href="http://tinypic.com?ref=behd8z" target="_blank"><img src="http://i67.tinypic.com/behd8z.jpg" border="0" alt="Image and video hosting by TinyPic"></a>
 
 The game should be working in it's present state (in 2 player mode with the exception of the rules listed below)...
 
 Usage Instructions:
 ------------------
-Follow the Github instructions to clone the project to your desktop and save to somewhere accessible to your PYTHONPATH e.g. c:\python27 if you are running python 2.7 in a Windows environment.
+Follow the GitHub instructions to clone the project to your desktop and save to somewhere accessible to your PYTHONPATH e.g. C:\Program Files\Python35 if you are running python 3.5 in a Windows environment.
+(I will create a setup.py file etc once there is a finished version 1).
 
 To start a game execute `python game.py` from the command line
 
@@ -30,7 +31,7 @@ Left to do on basic two player ASCII mode:
    2. After 50 moves without a pawn being moved or peice being taken (50 move rule);
 5. Help menu
 
-Left to do on bacic chess engine (for one player mode):
+Left to do on basic chess engine (for one player mode):
 ------------------------------------------------------
 
 1. Generalise code to look ahead x moves;

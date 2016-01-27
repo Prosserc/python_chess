@@ -193,7 +193,7 @@ class Game(object):
         [cur_rank, cur_file] = cell_ref_to_pos(prompt[:2])
         piece_ref = self.board.get_piece_ref(cur_rank, cur_file)
         piece = self.pieces[piece_ref]
-        
+
         try:
             assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
         except:
