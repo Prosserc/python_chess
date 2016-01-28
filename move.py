@@ -180,24 +180,24 @@ class Move(object):
         except IndexError:
             return 'okay'  # no conditions on move
 
-        for cond in conditions:
+        for condition in conditions:
             if VERBOSE and not self.theoretical_move:
-                print('Checking condition: ' + str(cond)) 
+                print('Checking condition: ' + str(condition))
             
-            if cond == 'on_first':
+            if condition == 'on_first':
                 if self.piece.move_cnt > 0:
                     invalid_msg = ("A pawn can only move two spaces on it's " +
                                    "first move.")
                     return invalid_msg
-            elif cond == 'on_take':
+            elif condition == 'on_take':
                 if self.new_pos not in self.occupied:
                     invalid_msg = 'A pawn can only move diagonally when taking.'
                     return invalid_msg
                 else:
-                    self.piece.valid_moves.remove(self.move + [cond])
-            #   T O   F O L L O W . . .
-            elif cond == 'en_passant':
-                invalid_msg = "Sorry " + cond + " rule not coded yet."
+                    self.piece.valid_moves.remove(self.move + [condition])
+            #   T O   F O L L O W . . . (todo)
+            elif condition == 'en_passant':
+                invalid_msg = "Sorry " + condition + " rule not coded yet."
                 return invalid_msg
         return 'okay'
 
