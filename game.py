@@ -14,9 +14,9 @@ from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
 LOGGING = False
 LOG = ''
 MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for the piece you "
-        "want to move and the cell reference for the new location. The first two characters of "
-        "your prompt entry are used to identify the current cell and the last two for the new "
-        "cell e.g. to move from A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
+                               "want to move and the cell reference for the new location. The first two characters of "
+                               "your prompt entry are used to identify the current cell and the last two for the new "
+                               "cell e.g. to move from A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
 
 
 class Game(object):
@@ -24,47 +24,39 @@ class Game(object):
     Top level class, the game object contains all of the other
     class instances such as the pieces, the board etc.
     """
-    PIECE_CODES = {'K': 'king', 'Q': 'queen', 'R':'rook',
-                   'B':'bishop', 'N': 'knight', 'p': 'pawn'}
+    PIECE_CODES = {'K': 'king', 'Q': 'queen', 'R': 'rook',
+                   'B': 'bishop', 'N': 'knight', 'p': 'pawn'}
     TEAMS = {'w': 'white', 'b': 'black'}
 
     # describe piece positions by rank (row from bottom up) and file (col)
     # used to instantiate Board and Piece classes
-    START_POSITIONS = { 8: {'A': 'bR1', 'B': 'bN1', 'C': 'bB1', 'D': 'bQ' ,
-                            'E': 'bK' , 'F': 'bB2', 'G': 'bN2', 'H': 'bR2'},
-                        7: {'A': 'bp1', 'B': 'bp2', 'C': 'bp3', 'D': 'bp4', 
-                            'E': 'bp5', 'F': 'bp6', 'G': 'bp7', 'H': 'bp8'},
-                        6: {'A': False, 'B': False, 'C': False, 'D': False, 
-                            'E': False, 'F': False, 'G': False, 'H': False},
-                        5: {'A': False, 'B': False, 'C': False, 'D': False, 
-                            'E': False, 'F': False, 'G': False, 'H': False},
-                        4: {'A': False, 'B': False, 'C': False, 'D': False, 
-                            'E': False, 'F': False, 'G': False, 'H': False},
-                        3: {'A': False, 'B': False, 'C': False, 'D': False, 
-                            'E': False, 'F': False, 'G': False, 'H': False},
-                        2: {'A': 'wp1', 'B': 'wp2', 'C': 'wp3', 'D': 'wp4', 
-                            'E': 'wp5', 'F': 'wp6', 'G': 'wp7', 'H': 'wp8'},
-                        1: {'A': 'wR1', 'B': 'wN1', 'C': 'wB1', 'D': 'wQ' ,
-                            'E': 'wK' , 'F': 'wB2', 'G': 'wN2', 'H': 'wR2'}
-                      }
+    START_POSITIONS = {
+        8: dict(A='bR1', B='bN1', C='bB1', D='bQ', E='bK', F='bB2', G='bN2', H='bR2'),
+        7: dict(A='bp1', B='bp2', C='bp3', D='bp4', E='bp5', F='bp6', G='bp7', H='bp8'),
+        6: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+        5: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+        4: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+        3: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+        2: dict(A='wp1', B='wp2', C='wp3', D='wp4', E='wp5', F='wp6', G='wp7', H='wp8'),
+        1: dict(A='wR1', B='wN1', C='wB1', D='wQ', E='wK', F='wB2', G='wN2', H='wR2')}
 
-    move_dict = {'king':   [[i, j] for i in range(-1, 2) for j in range(-1, 2) if i != 0 or j != 0],
-                 'rook':   [[i, 0] for i in range(-8, 9) if i != 0] +
-                           [[0, i] for i in range(-8, 9) if i != 0],
+    move_dict = {'king': [[i, j] for i in range(-1, 2) for j in range(-1, 2) if i != 0 or j != 0],
+                 'rook': [[i, 0] for i in range(-8, 9) if i != 0] +
+                         [[0, i] for i in range(-8, 9) if i != 0],
                  'bishop': [[i, i] for i in range(-8, 9) if i != 0] +
-                           [[i, i*-1] for i in range(-8, 9) if i != 0],
-                 'knight': [[i, j] for i in range(-2, 3) for j in range(-2, 3) if abs(i)+abs(j) == 3],
-                 'pawn':   [[1, i, msg] for i in [-1, 1] for msg in ['on_take', 'en_passant']] +
-                           [[2, 0, 'on_first'], [1, 0]]
+                           [[i, i * -1] for i in range(-8, 9) if i != 0],
+                 'knight': [[i, j] for i in range(-2, 3) for j in range(-2, 3)
+                            if abs(i) + abs(j) == 3],
+                 'pawn': [[1, i, msg] for i in [-1, 1] for msg in ['on_take', 'en_passant']] +
+                         [[2, 0, 'on_first'], [1, 0]]
                  }
-    move_dict['queen'] = move_dict['rook']+move_dict['bishop']
-
+    move_dict['queen'] = move_dict['rook'] + move_dict['bishop']
 
     def __init__(self):
         """
         Initialise game object and create required member objects
         """
-                     
+
         self.board = Board(Game.START_POSITIONS)
         self.pieces = self.__create_pieces(Game.move_dict)
 
@@ -75,16 +67,15 @@ class Game(object):
         self.turns = 0
         self.current_team = None
 
-
-    def __to_JSON(self):
+    def __to_json(self):
         """
         Output entire object contents as json.
         """
-        return json.dumps(self, default=lambda o: o.__dict__, 
+        return json.dumps(self, default=lambda o: o.__dict__,
                           sort_keys=True, indent=4)
 
-
-    def __create_pieces(self, move_dict):
+    @staticmethod
+    def __create_pieces(move_dict):
         """
         Creates a object for each piece and creates a dictionary to
         enable access to the pieces via their ref. 
@@ -96,13 +87,12 @@ class Game(object):
         for row, row_content in Game.START_POSITIONS.items():
             if row > 0:
                 for col, piece_ref in row_content.items():
-                    if piece_ref: 
+                    if piece_ref:
                         team = Game.TEAMS[piece_ref[0]]
-                        name = Game.PIECE_CODES[piece_ref[1]]       
-                        pieces[piece_ref] = Piece(piece_ref, name, team, 
+                        name = Game.PIECE_CODES[piece_ref[1]]
+                        pieces[piece_ref] = Piece(piece_ref, name, team,
                                                   row, col, move_dict)
         return pieces
-
 
     def take_turn(self, team, prompt=None, move=None):
         """
@@ -118,7 +108,7 @@ class Game(object):
         occupied, our_team, their_team = self.get_occupied()
         validated, found_issue = False, False
         if self.check:
-            user_feedback = shout(team + ' team in check', 
+            user_feedback = shout(team + ' team in check',
                                   print_output=False, return_output=True)
         else:
             user_feedback = None
@@ -131,13 +121,12 @@ class Game(object):
             else:
                 if not prompt:
                     print(self.board.draw_board())
-                    if user_feedback: 
+                    if user_feedback:
                         print(user_feedback + '\n')
-                        user_feedback = None
                     prompt = input("[" + team + " move] >> ")
 
                 piece, up, right, found_issue, user_feedback = \
-                   self.__parse_prompt(prompt, our_team)
+                    self.__parse_prompt(prompt, our_team)
 
                 if not found_issue:
                     # create object for move, this evaluates potential issues etc.
@@ -146,20 +135,20 @@ class Game(object):
                         validated = True
                     else:
                         user_feedback = move.invalid_reason
-                        move = None # clear ready for next loop
+                        move = None  # clear ready for next loop
 
-            prompt = None # clear ready for next loop
+            prompt = None  # clear ready for next loop
 
         # noinspection PyUnboundLocalVariable
         self.__process_move(piece, move, up, right, occupied, our_team, their_team)
 
         # log state of game
         if LOGGING:
-            LOG = '\n'.join([LOG, self.__to_JSON()])
+            LOG = '\n'.join([LOG, self.__to_json()])
 
         # wrap up if done...
-        if self.checkmate or self.turns >= 200: ## TODO (see below)
-            if self.turns >= 200: # TODO - replace with self.draw once draw rules done
+        if self.checkmate or self.turns >= 200:
+            if self.turns >= 200:  # TODO - replace with self.draw once draw rules done
                 shout(str(self.turns) + ' moves, lets call it a draw')
             elif self.checkmate:
                 shout('game over, ' + self.current_team + ' team wins')
@@ -167,7 +156,6 @@ class Game(object):
                 write_log(LOG)
             input('\nPress enter to close game...')
             raise Exception('Game Finished')
-
 
     def __parse_prompt(self, prompt, our_team):
         """
@@ -180,14 +168,14 @@ class Game(object):
             VERBOSE = not VERBOSE
             user_feedback = "Debugging " + ("on" if VERBOSE else "off")
             return None, None, None, True, user_feedback
-        elif prompt.lower() == 'redraw': # TODO remove if not needed
+        elif prompt.lower() == 'redraw':  # TODO remove if not needed
             print(self.board.draw_board())
             return None, None, None, True, None
         elif prompt.lower()[:4] == 'list':
             self.get_all_possible_moves(list_moves=True)
-            return None, None, None, True, None           
+            return None, None, None, True, None
 
-        # attempt to get details of piece to be moved...
+            # attempt to get details of piece to be moved...
         # use first two characters as current cell_ref
         [cur_rank, cur_file] = cell_ref_to_pos(prompt[:2])
         piece_ref = self.board.get_piece_ref(cur_rank, cur_file)
@@ -195,29 +183,28 @@ class Game(object):
 
         try:
             assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
-        except:
+        except AssertionError:
             user_feedback = ('A piece in your team could not be found ' +
-                              'in cell: ' + prompt[:2] + '\n(using the ' +
-                              'first two characters from your entry)')
+                             'in cell: ' + prompt[:2] + '\n(using the ' +
+                             'first two characters from your entry)')
             return None, None, None, True, user_feedback
+
+        # use last two characters as new cell_ref
+        [new_rank, new_file] = cell_ref_to_pos(prompt[-2:])
+        up, right = new_rank - cur_rank, new_file - cur_file
+
+        if VERBOSE:
+            print('piece_ref: {0} | up: {1} | right: {2}'.format(piece.ref), str(up), str(right))
 
         # attempt to get destination...
         try:
-            # use last two characters as new cell_ref
-            [new_rank, new_file] = cell_ref_to_pos(prompt[-2:])
-            up, right = new_rank - cur_rank, new_file - cur_file
-
-            if VERBOSE:
-                print('piece_ref: ' + piece.ref + ' | up: ' + str(up) + 
-                      ' | right: ' + str(right))
             assert up in range(-8, 9) and right in range(-8, 9)
-        except:
+        except AssertionError:
             user_feedback = ('A valid new cell could not be identified ' +
-                              'from your input: ' + prompt)
+                             'from your input: ' + prompt)
             return piece, None, None, True, user_feedback
 
         return piece, up, right, False, None
-
 
     def get_occupied(self):
         """
@@ -234,7 +221,6 @@ class Game(object):
                 else:
                     their_team[ref] = piece
         return occupied, our_team, their_team
-
 
     def __process_move(self, piece, move, up, right, occupied, our_team, their_team):
         """
@@ -262,13 +248,13 @@ class Game(object):
                 shout('taken piece: ' + taken_piece.ref)
 
         # update board
-        self.board.update_board(move.pos, move.new_pos, piece.ref) 
+        self.board.update_board(move.pos, move.new_pos, piece.ref)
 
         # tmp TEST - see if refresh of get_occupied is needed #############
         assert our_team[piece.ref].pos == piece.pos
-        if move.take: 
+        if move.take:
             assert their_team[taken_piece.ref].taken
-        #occupied, our_team, their_team = self.get_occupied() # refresh
+        # occupied, our_team, their_team = self.get_occupied() # refresh
         ###################################################################
 
         # other player in check?
@@ -281,7 +267,6 @@ class Game(object):
             # other player in checkmate?
             self.checkmate = self.__in_checkmate(occupied, our_team, their_team)
 
-
     def __in_check(self, piece, occupied, our_team, their_team):
         """
         Determine whether the opponent's king is in check, done by
@@ -293,14 +278,14 @@ class Game(object):
             print('Checking if other player is in check...')
 
         # work out move required to get to their king
-        their_king = (self.pieces['wK'] if self.current_team == 'black' 
+        their_king = (self.pieces['wK'] if self.current_team == 'black'
                       else self.pieces['bK'])
         up = their_king.row - piece.row
         right = col_letter_to_no(their_king.col) - col_letter_to_no(piece.col)
         if VERBOSE:
-            print('..possible to move ' + piece.ref + ' from ' + 
+            print('..possible to move ' + piece.ref + ' from ' +
                   str(piece.pos) + ' to ' + str(their_king.pos) + '?')
-        theoretical_move = Move(piece, up, right, occupied, our_team, 
+        theoretical_move = Move(piece, up, right, occupied, our_team,
                                 their_team, theoretical_move=True)
         if theoretical_move.possible:
             return True
@@ -308,7 +293,6 @@ class Game(object):
             if VERBOSE:
                 print('..invalid_reason: ' + theoretical_move.invalid_reason)
             return False
-
 
     def __in_checkmate(self, occupied, our_team, their_team):
         """
@@ -323,19 +307,18 @@ class Game(object):
             p_dict = {ref: piece}
             # intentionally reverse our team and their team params as 
             # we want to simulate all possible moves for opponent
-            all_moves, cnt = self.get_all_possible_moves(occupied=occupied, 
-                                                         our_team=their_team, 
-                                                         their_team=our_team, 
+            all_moves, cnt = self.get_all_possible_moves(occupied=occupied,
+                                                         our_team=their_team,
+                                                         their_team=our_team,
                                                          pieces=p_dict,
                                                          list_moves=VERBOSE)
             if cnt > 0:
                 print("Not checkmate (type list at prompt if you want to " +
-                      "display all poissible moves)")
+                      "display all possible moves)")
                 return False
         return True
 
-
-    def get_all_possible_moves(self, occupied=None, our_team=None, 
+    def get_all_possible_moves(self, occupied=None, our_team=None,
                                their_team=None, pieces=None,
                                list_moves=False, team=None):
         """
@@ -350,9 +333,7 @@ class Game(object):
         Team param is picked up from game object when not supplied.
         """
         # get defaults if args missing
-        if not team:
-            team = self.current_team
-        else:
+        if team:
             self.current_team = team
         if (not occupied) or (not our_team) or (not their_team):
             occupied, our_team, their_team = self.get_occupied()
@@ -364,7 +345,7 @@ class Game(object):
             all_possible_moves[ref] = []
             for potential_move in piece.valid_moves:
                 [up, right] = potential_move[:2]
-                theoretical_move = Move(piece, up, right, occupied, our_team, 
+                theoretical_move = Move(piece, up, right, occupied, our_team,
                                         their_team, theoretical_move=True)
                 if theoretical_move.possible:
                     # T O   R E V I E W 
@@ -379,10 +360,10 @@ class Game(object):
                 del theoretical_move
 
         if list_moves:
-            print('\nPossible moves:') 
+            print('\nPossible moves:')
             for ref, moves in iter(sorted(all_possible_moves.items())):
-                print(self.pieces[ref].name.ljust(6) + 
-                      (' (' + ref + ')').ljust(5) + ': ' + 
+                print(self.pieces[ref].name.ljust(6) +
+                      (' (' + ref + ')').ljust(5) + ': ' +
                       ', '.join([pos_to_cell_ref(obj.new_pos) for obj in moves]))
             _ = input("Press enter to continue")
 
@@ -393,11 +374,11 @@ def main():
     """
     Main entry point for program
     """
-    game = Game() # create game object as new instance of Game class
+    game = Game()  # create game object as new instance of Game class
 
     # add set up func for 1/2 player options etc
     print(MOVE_INSTRUCTIONS)
-    #_ = input('\nPress enter to continue...')
+    # _ = input('\nPress enter to continue...')
 
     while not game.checkmate:
         game.take_turn('white')
@@ -411,30 +392,30 @@ if __name__ == '__main__':
     main()
 
 
-##  N O T E S :
-##  =========
+    #  N O T E S :
+    #  =========
 
-##  Performance:
-##    - load all possible moves for each player at the start of each turn so 
-##      that they are already know by the time the player comes to move?
-##      - if doing this would need a keyboardinterupt exception???
-##        To pick up cases when the user was ready to make their move before  
-##        all possible moves had been pre-loaded (then just get moves for the 
-##        piece they select) e.g.:
-##http://stackoverflow.com/questions/7180914/pause-resume-a-python-script-in-middle
-##    - LOGGING needs to be fully written (lazy implementation at present)
+    #  Performance:
+    #    - load all possible moves for each player at the start of each turn so
+    #      that they are already know by the time the player comes to move?
+    #      - if doing this would need a keyboardinterupt exception???
+    #        To pick up cases when the user was ready to make their move before
+    #        all possible moves had been pre-loaded (then just get moves for the
+    #        piece they select) e.g.:
+    #        http://stackoverflow.com/questions/7180914/pause-resume-a-python-script-in-middle
+    #    - LOGGING needs to be fully written (lazy implementation at present)
 
-##  Bugs:
-##    - prompt not re-prompting for invalid input
-##    - automated game - King seems to put itself in check with pawns (found
-##      cause - game object is not updated after moves - need to make copies).
-##    - option to draw board for automated game.
+    #  Bugs:
+    #    - prompt not re-prompting for invalid input
+    #    - automated game - King seems to put itself in check with pawns (found
+    #      cause - game object is not updated after moves - need to make copies).
+    #    - option to draw board for automated game.
 
 
 
-## new comments:
-##   - need to split off all console related stuff (so that it uses some UI that provides
-##     some functions etc and console can be replaced with a GUI that provides the same..
-##     - parse prompt
-##     - print(board display) etc
-##     - take concept of positions away from board? (implement bitboard?)
+    # new comments:
+    #   - need to split off all console related stuff (so that it uses some UI that provides
+    #     some functions etc and console can be replaced with a GUI that provides the same..
+    #     - parse prompt
+    #     - print(board display) etc
+    #     - take concept of positions away from board? (implement bitboard?)

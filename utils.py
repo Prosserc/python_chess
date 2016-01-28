@@ -15,7 +15,7 @@ def pos_to_cell_ref(pos):
     cell is described as a letter for the column followed by a number 
     for the row e.g. [1, 1] becomes 'A1' or [4, 8] becomes 'H4'.
     """
-    return col_no_to_letter(pos[1]) + str(pos[0])
+    return "{0}{1}".format(col_no_to_letter(pos[1]), str(pos[0]))
 
 
 def col_no_to_letter(col_no):
