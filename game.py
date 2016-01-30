@@ -14,9 +14,9 @@ from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
 LOGGING = False
 LOG = ''
 MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for the piece you "
-                               "want to move and the cell reference for the new location. The first two characters of "
-                               "your prompt entry are used to identify the current cell and the last two for the new "
-                               "cell e.g. to move from A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
+       "want to move and the cell reference for the new location. The first two characters of "
+       "your prompt entry are used to identify the current cell and the last two for the new "
+       "cell e.g. to move from A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
 
 
 class Game(object):
