@@ -4,4 +4,7 @@ __pycache__/
 
 # ignore sub directories not intended for repo
 *plans/
-*.idea/
+.idea/
+.idea/misc.xml
+.idea/workspace.xml
+.idea/python_chess.iml
