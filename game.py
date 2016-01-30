@@ -404,18 +404,3 @@ if __name__ == '__main__':
     #        piece they select) e.g.:
     #        http://stackoverflow.com/questions/7180914/pause-resume-a-python-script-in-middle
     #    - LOGGING needs to be fully written (lazy implementation at present)
-
-    #  Bugs:
-    #    - prompt not re-prompting for invalid input
-    #    - automated game - King seems to put itself in check with pawns (found
-    #      cause - game object is not updated after moves - need to make copies).
-    #    - option to draw board for automated game.
-
-
-
-    # new comments:
-    #   - need to split off all console related stuff (so that it uses some UI that provides
-    #     some functions etc and console can be replaced with a GUI that provides the same..
-    #     - parse prompt
-    #     - print(board display) etc
-    #     - take concept of positions away from board? (implement bitboard?)
