@@ -1,0 +1,10 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# ignore sub directories not intended for repo
+*plans/
+.idea/
+.idea/misc.xml
+.idea/workspace.xml
+.idea/python_chess.iml
