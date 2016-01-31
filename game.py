@@ -6,6 +6,7 @@ import json
 from board import Board
 from piece import Piece
 from move import Move
+from literals import PIECE_CODES, START_POSITIONS, TEAMS
 # from chess_engine import pick_move
 from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
                    col_letter_to_no, col_no_to_letter, format_msg, VERBOSE)
@@ -24,22 +25,6 @@ class Game(object):
     Top level class, the game object contains all of the other
     class instances such as the pieces, the board etc.
     """
-    PIECE_CODES = {'K': 'king', 'Q': 'queen', 'R': 'rook',
-                   'B': 'bishop', 'N': 'knight', 'p': 'pawn'}
-    TEAMS = {'w': 'white', 'b': 'black'}
-
-    # describe piece positions by rank (row from bottom up) and file (col)
-    # used to instantiate Board and Piece classes
-    START_POSITIONS = {
-        8: dict(A='bR1', B='bN1', C='bB1', D='bQ', E='bK', F='bB2', G='bN2', H='bR2'),
-        7: dict(A='bp1', B='bp2', C='bp3', D='bp4', E='bp5', F='bp6', G='bp7', H='bp8'),
-        6: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-        5: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-        4: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-        3: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-        2: dict(A='wp1', B='wp2', C='wp3', D='wp4', E='wp5', F='wp6', G='wp7', H='wp8'),
-        1: dict(A='wR1', B='wN1', C='wB1', D='wQ', E='wK', F='wB2', G='wN2', H='wR2')}
-
     move_dict = {'king': [[i, j] for i in range(-1, 2) for j in range(-1, 2) if i != 0 or j != 0],
                  'rook': [[i, 0] for i in range(-8, 9) if i != 0] +
                          [[0, i] for i in range(-8, 9) if i != 0],
@@ -57,7 +42,7 @@ class Game(object):
         Initialise game object and create required member objects
         """
 
-        self.board = Board(Game.START_POSITIONS)
+        self.board = Board(START_POSITIONS)
         self.pieces = self.__create_pieces(Game.move_dict)
 
         # initialise variables that will be needed later
@@ -84,14 +69,13 @@ class Game(object):
         """
         pieces = {}
 
-        for row, row_content in Game.START_POSITIONS.items():
+        for row, row_content in START_POSITIONS.items():
             if row > 0:
                 for col, piece_ref in row_content.items():
                     if piece_ref:
-                        team = Game.TEAMS[piece_ref[0]]
-                        name = Game.PIECE_CODES[piece_ref[1]]
-                        pieces[piece_ref] = Piece(piece_ref, name, team,
-                                                  row, col, move_dict)
+                        team = TEAMS[piece_ref[0]]
+                        name = PIECE_CODES[piece_ref[1]]
+                        pieces[piece_ref] = Piece(piece_ref, name, team, row, col, move_dict)
         return pieces
 
     def take_turn(self, team, prompt=None, move=None):
