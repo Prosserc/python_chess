@@ -6,19 +6,12 @@ import json
 from board import Board
 from piece import Piece
 from move import Move
-from literals import PIECE_CODES, START_POSITIONS, TEAMS
+from literals import PIECE_CODES, START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
 # from chess_engine import pick_move
 from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
-                   col_letter_to_no, col_no_to_letter, format_msg, VERBOSE)
+                   col_letter_to_no, col_no_to_letter, VERBOSE)
 
-# constants
-LOGGING = False
 LOG = ''
-MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for the piece you "
-       "want to move and the cell reference for the new location. The first two characters of "
-       "your prompt entry are used to identify the current cell and the last two for the new "
-       "cell e.g. to move from A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
-
 
 class Game(object):
     """
@@ -75,7 +68,7 @@ class Game(object):
                     if piece_ref:
                         team = TEAMS[piece_ref[0]]
                         name = PIECE_CODES[piece_ref[1]]
-                        pieces[piece_ref] = Piece(piece_ref, name, team, row, col, move_dict)
+                        pieces[piece_ref] = Piece(piece_ref, name, team, row, col, move_dict[name])
         return pieces
 
     def take_turn(self, team, prompt=None, move=None):
