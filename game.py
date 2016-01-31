@@ -131,11 +131,13 @@ class Game(object):
                 if not hold_move:
                     # create object for move, this evaluates potential issues etc.
                     move = Move(piece, up, right, occupied, our_team, their_team)
-                    if move.possible:
-                        validated = True
-                    else:
-                        user_feedback = move.invalid_reason
-                        move = None  # clear ready for next loop
+
+            if move:
+                if move.possible:
+                    validated = True
+                else:
+                    user_feedback = move.invalid_reason
+                    move = None  # clear ready for next loop
 
             prompt = None  # clear ready for next loop
 
@@ -184,16 +186,14 @@ class Game(object):
 
         if piece_ref:
             piece = self.pieces[piece_ref]
-        else:
-            user_feedback = 'No piece found at the cell ref given ({0})'.format(current_cell_ref)
-            piece, up, right, hold_move, user_feedback
 
         try:
-            assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team]) # todo consider more efficient ways to achieve the same
+            # todo consider more efficient ways to achieve the same
+            assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
         except AssertionError:
-            user_feedback = ('A piece in your team could not be found ' +
-                             'in cell: ' + prompt[:2] + '\n(using the ' +
-                             'first two characters from your entry)')
+            user_feedback = (
+                'A piece in your team could not be found in cell: {0}\n' +
+                '(using the first two characters from your entry)').format(current_cell_ref)
             return piece, up, right, hold_move, user_feedback
 
         # use last two characters as new cell_ref
@@ -207,8 +207,8 @@ class Game(object):
         try:
             assert up in range(-8, 9) and right in range(-8, 9)
         except AssertionError:
-            user_feedback = ('A valid new cell could not be identified ' +
-                             'from your input: ' + prompt)
+            user_feedback = (
+                'A valid new cell could not be identified from your input: {0}'.format(prompt))
             return piece, up, right, hold_move, user_feedback
 
         hold_move = False

@@ -53,6 +53,26 @@ class Move(object):
                 shout('move allowed')
 
 
+    @property
+    def row(self):
+        return self.rank
+
+
+    @property
+    def col(self):
+        return col_no_to_letter(self._file)
+
+
+    @property
+    def new_row(self):
+        return self.new_rank
+
+
+    @property
+    def new_col(self):
+        return col_no_to_letter(self.new_file)
+
+
     def check_move(self):
         """
         Run checks to see whether a move is possible.

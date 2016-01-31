@@ -10,7 +10,8 @@ piece_vals = {'king': float("inf"), 'queen': 9, 'rook': 5, 'bishop': 3.5,
               'knight': 3.2, 'pawn': 1}
 
 # no of seconds to sleep after a move
-SLEEP_SECS = 0.2 # (less than 0.2 can cause issues with windows cmd prompt)
+SLEEP_SECS = 2 # (less than 0.2 can cause issues with windows cmd prompt)
+DRAWING_ON = True
 
 def pick_rnd(lst, cnt=None):
     """Returns a random item from a list."""
@@ -37,8 +38,7 @@ def level1_move(game, team):
         for move_obj in moves:
             obj_list.append(move_obj)
             if move_obj.take:
-                take_ref = \
-                   game.board.positions[move_obj.new_row][move_obj.new_col]
+                take_ref = game.board.positions[move_obj.new_row][move_obj.new_col]
                 points = piece_vals[game.pieces[take_ref].name]
                 if points > max_points:
                     max_points, selected_move = points, move_obj
@@ -52,7 +52,7 @@ def level2_move(game, team):
     score by value of pieces taken (minus any taken from yours),
     select one resulting in the best points."""
     ## TO FOLLOW
-    ## wrewrite at some point as generic function to look any number of levels...
+    ## re-write at some point as generic function to look any number of levels...
     move_dict, cnt = game.get_all_possible_moves(team=team)
     max_points, obj_list = 0, []
     for piece_ref, moves in move_dict.items():
@@ -83,7 +83,7 @@ def level3_move(game, team):
     pieces taken (minus any taken from yours), select one resulting in
     the best points."""
     ## TO FOLLOW
-    ## wrewrite at some point as generic function to look any number of levels...
+    ## rewrite at some point as generic function to look any number of levels...
     move_dict, cnt = game.get_all_possible_moves(team=team)
     max_points, obj_list = 0, []
     for piece_ref, moves in move_dict.items():
@@ -120,13 +120,16 @@ def play(turns=200):
     # create top level object that starts the game, draws the pieces etc.
     game, team = Game(), 'None'
 
-    level_fuction = {0: random_move, 1: level1_move, 2: level2_move, 3: level3_move}
-    team_levels = {'white': 3, 'black': 0}
+    level_function = {0: random_move, 1: level1_move, 2: level2_move, 3: level3_move}
+    team_levels = {'white': 1, 'black': 0}
 
     while not game.checkmate and game.turns < turns:
         # try:
         for team in ['white', 'black']:
-            func = level_fuction[team_levels[team]]
+            if DRAWING_ON:
+                game.board.draw_board()
+
+            func = level_function[team_levels[team]]
             move_obj = func(game, team)
             game.take_turn(team, prompt=None, move=move_obj)
             sleep(SLEEP_SECS)
