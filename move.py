@@ -22,27 +22,23 @@ class Move(object):
         self.piece = piece  # store piece object against move
         self.up = up
         self.right = right
-        self.move = [up, right]
-        self.rank = piece.pos[0]
-        self._file = piece.pos[1]
-        self.pos = piece.pos
-        self.cell_ref = pos_to_cell_ref(self.pos)
-        self.new_rank = self.rank + up
-        self.new_file = self._file + right
-        self.new_pos = [self.new_rank, self.new_file]
-        self.new_cell_ref = pos_to_cell_ref(self.new_pos)
+
+        # REVIEW - pass the following three in as func(s) from Game if need to save RAM
         self.occupied = occupied
         self.our_team = our_team
         self.their_team = their_team
-        # self._id = self.__generate_id() # REVIEW - Needed?
-        self.our_team_cells = [our_team[piece_ref].pos for piece_ref in our_team]
-        self.their_team_cells = [their_team[piece_ref].pos for piece_ref in their_team]
+
         self.theoretical_move = theoretical_move
         self.stop_recursion = stop_recursion
 
-        # initialise variable to be set later...
+        # REVIEW - convert to props if need to save ram (used twice so keeping for CPU for now)
+        self.our_team_cells = [our_team[piece_ref].pos for piece_ref in our_team]
+        self.their_team_cells = [their_team[piece_ref].pos for piece_ref in their_team]
+
+        # initialise variables to be set later...
         self.check, self.take = None, False
-        # performance consideration to stop at first invalid reason
+
+        # validate move
         self.possible, self.invalid_reason = self.check_move()
 
         if not self.possible:
@@ -54,23 +50,68 @@ class Move(object):
 
 
     @property
+    def move(self):
+        return [self.up, self.right]
+
+    @property
+    def rank(self):
+        return self.piece.rank
+
+    @property
+    def _file(self):
+        return self.piece._file
+
+    @property
+    def pos(self):
+        return self.piece.pos
+
+    @property
     def row(self):
         return self.rank
-
 
     @property
     def col(self):
         return col_no_to_letter(self._file)
 
-
     @property
     def new_row(self):
         return self.new_rank
 
-
     @property
     def new_col(self):
         return col_no_to_letter(self.new_file)
+
+    @property
+    def cell_ref(self):
+        return self.piece.cell_ref
+
+    @property
+    def new_rank(self):
+        return self.rank + self.up
+
+    @property
+    def new_file(self):
+        return self._file + self.right
+
+    @property
+    def new_pos(self):
+        return [self.new_rank, self.new_file]
+
+    @property
+    def new_cell_ref(self):
+         return pos_to_cell_ref(self.new_pos)
+
+    @property
+    def _id(self):
+        """
+        Generate unique moveID based on piece_ref being moved and position of every other piece.
+        """
+        _id = ('mv:' + self.piece.ref + "-" + str(self.rank * self._file) + "-" +
+               str(self.new_rank * self.new_file) + ",oth:")
+        for ref, piece in self.their_team.items():
+            if not piece.taken and ref != self.piece.ref:
+                _id = '+'.join([_id, (ref + '-' + str(piece.row * col_letter_to_no(piece.col)))])
+        return _id
 
 
     def check_move(self):
@@ -88,8 +129,8 @@ class Move(object):
             if VERBOSE and not self.theoretical_move:
                 print(func.__doc__ + ' - ' + result)
             if result != 'okay':
-                return False, result
-
+                return False, result  # stop at first invalid reason for performance
+                                      # (most expensive checks last)
         return True, None
 
 
@@ -281,20 +322,6 @@ class Move(object):
         if not invalid_msg:
             return 'okay'
         return invalid_msg
-
-
-    def generate_id(self):
-        """
-        Generate unique moveID based on piece_ref being moved and
-        position of every other piece.
-        """
-        # fix - new/old showing as same
-        _id = ('mv:' + self.piece.ref + "-" + str(self.rank * self._file) + "-" +
-               str(self.new_rank * self.new_file) + ",oth:")
-        for ref, piece in self.their_team.items():
-            if not piece.taken and ref != self.piece.ref:
-                _id = '+'.join([_id, (ref + '-' + str(piece.row * col_letter_to_no(piece.col)))])
-        return _id
 
 
 if __name__ == '__main__':

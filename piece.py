@@ -3,7 +3,7 @@
 Called from python_chess.game
 """
 import json
-from utils import col_letter_to_no, WRONG_ENTRY_POINT_MSG
+from utils import col_letter_to_no, col_no_to_letter, pos_to_cell_ref, WRONG_ENTRY_POINT_MSG
 
 
 class Piece(object):
@@ -13,17 +13,16 @@ class Piece(object):
     """
 
 
-    def __init__(self, ref, name, team, row, col, move_dict):
+    def __init__(self, ref, name, team, row, col, piece_moves):
         """
         Get attributes required for piece.
         """
         self.ref = ref
         self.name = name
         self.team = team
-        self.row = int(row)
-        self.col = col
-        self.pos = [int(row), col_letter_to_no(col)]
-        self.valid_moves = self.get_valid_moves(move_dict)
+        self.rank = int(row)
+        self._file = col_letter_to_no(col)
+        self.valid_moves = self.get_valid_moves(piece_moves)
         self.move_cnt = 0
         self.taken = False
 
@@ -35,6 +34,23 @@ class Piece(object):
             self.one_space_moves = self.get_one_space_moves()
 
 
+    @property
+    def row(self):
+        return self.rank
+
+    @property
+    def col(self):
+        return col_no_to_letter(self._file)
+
+    @property
+    def pos(self):
+        return [self.rank, self._file]
+
+    @property
+    def cell_ref(self):
+        return pos_to_cell_ref(self.pos)
+
+
     def __to_json(self):
         """
         Output entire object contents as json.
@@ -42,7 +58,7 @@ class Piece(object):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 
-    def get_valid_moves(self, move_dict):
+    def get_valid_moves(self, piece_moves):
         """
         Returns all of the moves possible for a piece before
         considerations for the board boundaries, other pieces etc.
@@ -51,12 +67,11 @@ class Piece(object):
         # [[-]down, [-]right, <condition1>, ..., <conditionN>]
         valid_moves = []
 
-        # invert direction for black pieces (as they will move down through rows board)
         if self.team.lower() == 'black':
-            for move in move_dict[self.name.lower()]:
-                valid_moves.append([move[0] * -1] + move[1:])
+            for move in piece_moves:
+                valid_moves.append([move[0] * -1] + move[1:]) # invert up/down moves
         else:
-            valid_moves = move_dict[self.name.lower()]
+            valid_moves = piece_moves
             
         return valid_moves
 
@@ -76,12 +91,3 @@ class Piece(object):
 
 if __name__ == '__main__':
     print(WRONG_ENTRY_POINT_MSG)
-
-
-# TODO - REVIEW:
-#  - consider whether storing row / col is the right thing? We do a lot of letter to no
-#    conversions and vice versa.
-#    Options
-#    - Just have rank and file (use properties to calc anything else?
-#    - Just have pos?
-#    - Move to bitboard to save memory (probably later)
