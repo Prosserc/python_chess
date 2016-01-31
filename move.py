@@ -2,10 +2,11 @@
 """
 Called from python_chess.game
 """
-from utils import (pos_to_cell_ref, col_no_to_letter, col_letter_to_no, shout,
-                   VERBOSE, WRONG_ENTRY_POINT_MSG)
+from utils import (pos_to_cell_ref, col_no_to_letter, shout, VERBOSE, WRONG_ENTRY_POINT_MSG)
 
 
+# noinspection PyProtectedMember
+# (_file is not protected, just avoids conflict with file)
 class Move(object):
     """
     Capture characteristics of actual or potential moves e.g. amount 
@@ -36,7 +37,7 @@ class Move(object):
         self.their_team_cells = [their_team[piece_ref].pos for piece_ref in their_team]
 
         # initialise variables to be set later...
-        self.check, self.take = None, False
+        self.check, self.take, self.in_new_pos = None, False, False
 
         # validate move
         self.possible, self.invalid_reason = self.check_move()
@@ -74,6 +75,22 @@ class Move(object):
         return col_no_to_letter(self._file)
 
     @property
+    def cell_ref(self):
+        return self.piece.cell_ref
+
+    @property
+    def new_rank(self):
+        return self.rank + 0 if self.in_new_pos else self.up
+
+    @property
+    def new_file(self):
+        return self._file + 0 if self.in_new_pos else self.up
+
+    @property
+    def new_pos(self):
+        return [self.new_rank, self.new_file]
+
+    @property
     def new_row(self):
         return self.new_rank
 
@@ -82,24 +99,8 @@ class Move(object):
         return col_no_to_letter(self.new_file)
 
     @property
-    def cell_ref(self):
-        return self.piece.cell_ref
-
-    @property
-    def new_rank(self):
-        return self.rank + self.up
-
-    @property
-    def new_file(self):
-        return self._file + self.right
-
-    @property
-    def new_pos(self):
-        return [self.new_rank, self.new_file]
-
-    @property
     def new_cell_ref(self):
-         return pos_to_cell_ref(self.new_pos)
+        return pos_to_cell_ref(self.new_pos)
 
     @property
     def _id(self):
@@ -110,7 +111,7 @@ class Move(object):
                str(self.new_rank * self.new_file) + ",oth:")
         for ref, piece in self.their_team.items():
             if not piece.taken and ref != self.piece.ref:
-                _id = '+'.join([_id, (ref + '-' + str(piece.row * col_letter_to_no(piece.col)))])
+                _id = '+'.join([_id, (ref + '-' + str(piece.rank * piece._file))])
         return _id
 
 
@@ -174,7 +175,7 @@ class Move(object):
             tmp_pos = self.pos
             while tmp_pos != self.new_pos:
                 # get all possible destination cells after a one space step
-                poss_steps = [ # REVIEW - can we simplify this expression
+                poss_steps = [  # REVIEW - can we simplify this expression
                     [tmp_pos[0] + up, tmp_pos[1] + right]
                     for up, right in [mv[:2] for mv in self.piece.one_space_moves]
                     if tmp_pos[0] + up in range(1, 9) and tmp_pos[1] + right in range(1, 9)]
@@ -199,8 +200,8 @@ class Move(object):
                     final_step = (tmp_pos == self.new_pos)
                     # if it's not the final position or they are in our team block
                     if (not final_step) or (tmp_pos in self.our_team_cells):
-                        invalid_msg = ('This move is blocked as ' + 
-                                       pos_to_cell_ref(tmp_pos) + ' is occupied.')
+                        invalid_msg = 'This move is blocked as {0} is occupied.'.format(
+                            self.cell_ref)
                         return invalid_msg
                     # also block if it is pawn going straight forward
                     elif (self.piece.name == 'pawn') and (self.right == 0):
@@ -274,8 +275,8 @@ class Move(object):
         # moves checked below will recognise the new position (i.e. as if you had
         # made the move).
         old_rank, old_file, old_pos = self.rank, self._file, self.pos  # copy for reverting
-        self.piece.row, self.piece.col = self.new_rank, col_no_to_letter(self.new_file)
-        self.piece.pos = self.new_pos 
+        self.piece.rank, self.piece._file = self.new_rank, self.new_file
+        self.in_new_pos = True
         if self.take:
             take_ref = [ref for ref in self.their_team.keys() 
                         if self.their_team[ref].pos == self.new_pos][0]
@@ -294,7 +295,7 @@ class Move(object):
         # attempting to take king, if possible then move would put you in check.
         for ref, their_piece in self.their_team.items(): 
             up = our_king.row - their_piece.row
-            right = col_letter_to_no(our_king.col) - col_letter_to_no(their_piece.col)
+            right = our_king._file - their_piece._file
             # reverse our_team and their team args to switch
             theoretical_move = Move(their_piece, up, right, self.occupied, 
                                     self.their_team, self.our_team, 
@@ -303,13 +304,13 @@ class Move(object):
             if theoretical_move.possible:
                 invalid_msg = ('You cannot move to this space as it would put ' +
                                'your king in check with the ' + their_piece.name +
-                               ' in cell ' + pos_to_cell_ref(theoretical_move.pos))
+                               ' in cell ' + theoretical_move.cell_ref)
                 break  # cannot return here as need to revert position etc.
             del theoretical_move
 
         # revert piece to original position
-        self.piece.row, self.piece.col = old_rank, col_no_to_letter(old_file)
-        self.piece.pos = old_pos
+        self.piece.rank, self.piece._file = old_rank, old_file
+        self.in_new_pos = False
         self.occupied[self.occupied.index(self.new_pos)] = [old_rank, old_file]
         if self.take:
             self.occupied.append(self.new_pos)  # re-instate taken piece

@@ -8,8 +8,7 @@ from piece import Piece
 from move import Move
 from literals import PIECE_CODES, START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
 # from chess_engine import pick_move
-from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref,
-                   col_letter_to_no, col_no_to_letter, VERBOSE)
+from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref, VERBOSE)
 
 LOG = ''
 
@@ -215,9 +214,8 @@ class Game(object):
         global taken_piece
         occupied.remove(piece.pos)
         piece.move_cnt += 1
-        piece.row += up
-        piece.col = col_no_to_letter(col_letter_to_no(piece.col) + right)
-        piece.pos = [piece.row, col_letter_to_no(piece.col)]
+        piece.rank += up
+        piece._file =+ right
         occupied.append(piece.pos)
 
         # check if anything was taken
@@ -265,8 +263,8 @@ class Game(object):
         # work out move required to get to their king
         their_king = (self.pieces['wK'] if self.current_team == 'black'
                       else self.pieces['bK'])
-        up = their_king.row - piece.row
-        right = col_letter_to_no(their_king.col) - col_letter_to_no(piece.col)
+        up = their_king.rank - piece.rank
+        right = their_king._file - piece._file
         if VERBOSE:
             print('..possible to move ' + piece.ref + ' from ' +
                   str(piece.pos) + ' to ' + str(their_king.pos) + '?')
