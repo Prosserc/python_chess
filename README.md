@@ -4,6 +4,8 @@ python_chess
 In progress... 
 I am initially working on a basic text based chess game in python. Once I have finished the ascii (text) version I may make a better UI for it or interface with an existing open source UI. This started out as just a two player game, but a basic chess engine to allow for one player games is also in progress.
 
+You can track the development progress on [this Trello board](https://trello.com/b/noOlB5EE/python-chess-current)
+
 Example Board:
 -------------
 
