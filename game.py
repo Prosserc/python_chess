@@ -238,7 +238,7 @@ class Game(object):
         # check if anything was taken
         if move.take:
             # get ref of taken piece BEFORE board update
-            taken_piece_ref = self.board.get_piece_ref(move.new_row, move.new_col)
+            taken_piece_ref = self.board.get_piece_ref(move.new_rank, move.new_file)
             taken_piece = self.pieces[taken_piece_ref]
             taken_piece.taken = True
             # tmp TEST - check piece updated is object from game ###
