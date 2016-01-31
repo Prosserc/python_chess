@@ -35,11 +35,9 @@ class Move(object):
         self.our_team = our_team
         self.their_team = their_team
         # self._id = self.__generate_id() # REVIEW - Needed?
-        self.our_team_cells = [our_team[piece_ref].pos 
-                               for piece_ref in our_team]
-        self.their_team_cells = [their_team[piece_ref].pos 
-                                 for piece_ref in their_team]
-        self.theoretical_move = theoretical_move                     
+        self.our_team_cells = [our_team[piece_ref].pos for piece_ref in our_team]
+        self.their_team_cells = [their_team[piece_ref].pos for piece_ref in their_team]
+        self.theoretical_move = theoretical_move
         self.stop_recursion = stop_recursion
 
         # initialise variable to be set later...
@@ -115,9 +113,9 @@ class Move(object):
             tmp_pos = self.pos
             while tmp_pos != self.new_pos:
                 # get all possible destination cells after a one space step
-                poss_steps = [
+                poss_steps = [ # REVIEW - can we simplify this expression
                     [tmp_pos[0] + up, tmp_pos[1] + right]
-                    for up, right in self.piece.one_space_moves
+                    for up, right in [mv[:2] for mv in self.piece.one_space_moves]
                     if tmp_pos[0] + up in range(1, 9) and tmp_pos[1] + right in range(1, 9)]
                 if VERBOSE and not self.theoretical_move:
                     print('Possible steps: ' + ', '.join(str(i) for i in poss_steps))

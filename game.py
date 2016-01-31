@@ -182,7 +182,7 @@ class Game(object):
         piece = self.pieces[piece_ref]
 
         try:
-            assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
+            assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team]) # todo consider more efficient ways to achieve the same
         except AssertionError:
             user_feedback = ('A piece in your team could not be found ' +
                              'in cell: ' + prompt[:2] + '\n(using the ' +
