@@ -125,10 +125,10 @@ class Game(object):
                         print(user_feedback + '\n')
                     prompt = input("[" + team + " move] >> ")
 
-                piece, up, right, found_issue, user_feedback = \
+                piece, up, right, hold_move, user_feedback = \
                     self.__parse_prompt(prompt, our_team)
 
-                if not found_issue:
+                if not hold_move:
                     # create object for move, this evaluates potential issues etc.
                     move = Move(piece, up, right, occupied, our_team, their_team)
                     if move.possible:
@@ -162,24 +162,31 @@ class Game(object):
         Determine piece to be moved and move required from prompt.
         """
         global VERBOSE
+        # setup return defaults
+        piece, up, right, hold_move, user_feedback = None, None, None, True, None
 
         # first check for special commands
         if prompt.lower()[:5] == 'debug':
             VERBOSE = not VERBOSE
-            user_feedback = "Debugging " + ("on" if VERBOSE else "off")
-            return None, None, None, True, user_feedback
-        elif prompt.lower() == 'redraw':  # TODO remove if not needed
+            user_feedback = "Debugging {0}".format("on" if VERBOSE else "off")
+            return piece, up, right, hold_move, user_feedback
+        elif prompt.lower() == 'redraw':
             print(self.board.draw_board())
-            return None, None, None, True, None
+            return piece, up, right, hold_move, user_feedback
         elif prompt.lower()[:4] == 'list':
             self.get_all_possible_moves(list_moves=True)
-            return None, None, None, True, None
+            return piece, up, right, hold_move, user_feedback
 
-            # attempt to get details of piece to be moved...
-        # use first two characters as current cell_ref
-        [cur_rank, cur_file] = cell_ref_to_pos(prompt[:2])
+        # attempt to get details of piece to be moved (first two chars as current cell_ref)
+        current_cell_ref = prompt[:2]
+        [cur_rank, cur_file] = cell_ref_to_pos(current_cell_ref)
         piece_ref = self.board.get_piece_ref(cur_rank, cur_file)
-        piece = self.pieces[piece_ref]
+
+        if piece_ref:
+            piece = self.pieces[piece_ref]
+        else:
+            user_feedback = 'No piece found at the cell ref given ({0})'.format(current_cell_ref)
+            piece, up, right, hold_move, user_feedback
 
         try:
             assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team]) # todo consider more efficient ways to achieve the same
@@ -187,7 +194,7 @@ class Game(object):
             user_feedback = ('A piece in your team could not be found ' +
                              'in cell: ' + prompt[:2] + '\n(using the ' +
                              'first two characters from your entry)')
-            return None, None, None, True, user_feedback
+            return piece, up, right, hold_move, user_feedback
 
         # use last two characters as new cell_ref
         [new_rank, new_file] = cell_ref_to_pos(prompt[-2:])
@@ -202,9 +209,10 @@ class Game(object):
         except AssertionError:
             user_feedback = ('A valid new cell could not be identified ' +
                              'from your input: ' + prompt)
-            return piece, None, None, True, user_feedback
+            return piece, up, right, hold_move, user_feedback
 
-        return piece, up, right, False, None
+        hold_move = False
+        return piece, up, right, hold_move, user_feedback
 
     def get_occupied(self):
         """
