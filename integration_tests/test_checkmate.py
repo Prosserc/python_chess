@@ -1,5 +1,5 @@
-#!/usr/bin/python
-"""Unit test for chess.py - preventable checkmate"""
+#!/usr/bin/env python
+"""Integration test for chess.py - checkmate"""
 from game import Game
 from time import sleep
 from utils import shout

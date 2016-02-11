@@ -1,7 +1,5 @@
-#!/usr/bin/python
-"""Unit test for chess.py - an automated game. As AI is not yet built
-these will be purely random moves with no intelligence, but will serve
-as a good test it will cover a broad array of pieces / moves."""
+#!/usr/bin/env python
+"""Integration test for chess.py - an automated game."""
 from game import Game
 from random import random as rnd
 from time import sleep
