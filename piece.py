@@ -20,8 +20,8 @@ class Piece(object):
         self.ref = ref
         self.name = name
         self.team = team
-        self.rank = int(row)
-        self._file = col_letter_to_no(col)
+        self.row = int(row)
+        self.col_no = col_letter_to_no(col)
         self.valid_moves = self.get_valid_moves(piece_moves)
         self.move_cnt = 0
         self.taken = False
@@ -33,18 +33,13 @@ class Piece(object):
             self.allowed_to_jump = False
             self.one_space_moves = self.get_one_space_moves()
 
-
-    @property
-    def row(self):
-        return self.rank
-
     @property
     def col(self):
-        return col_no_to_letter(self._file)
+        return col_no_to_letter(self.col_no)
 
     @property
     def pos(self):
-        return [self.rank, self._file]
+        return [self.row, self.col_no]
 
     @property
     def cell_ref(self):
@@ -69,7 +64,7 @@ class Piece(object):
 
         if self.team.lower() == 'black':
             for move in piece_moves:
-                valid_moves.append([move[0] * -1] + move[1:]) # invert up/down moves
+                valid_moves.append([move[0] * -1] + move[1:])  # invert up/down moves
         else:
             valid_moves = piece_moves
             

@@ -2,7 +2,8 @@
 """
 Called from python_chess.game. This version is used for ASCII mode.
 """
-from utils import VERBOSE, col_no_to_letter, WRONG_ENTRY_POINT_MSG
+from utils import VERBOSE, col_no_to_letter, WRONG_ENTRY_POINT_MSG, shout
+from pprint import pprint
 
 
 class Board(object):
@@ -78,12 +79,11 @@ class Board(object):
         return display
 
 
-    def get_piece_ref(self, rank, _file):
+    def get_piece_ref(self, row, col_no):
         """
         Get a piece object from the positions list.
         """
-        row = rank
-        col = col_no_to_letter(_file)
+        col = col_no_to_letter(col_no)
         if VERBOSE:
             print("self.positions[row][col] set to {0}".format(self.positions[row][col]))
         return self.positions[row][col]   
@@ -94,15 +94,22 @@ class Board(object):
         Reflect a successful move on the board positions.
         """
         old_row, new_row = old_pos[0], new_pos[0]
-        old_file, new_file = old_pos[1], new_pos[1]
-        old_col, new_col = col_no_to_letter(old_file), col_no_to_letter(new_file)
+        old_col_no, new_col_no = old_pos[1], new_pos[1]
+        old_col, new_col = col_no_to_letter(old_col_no), col_no_to_letter(new_col_no)
         self.positions[old_row][old_col] = False
         self.positions[new_row][new_col] = piece_ref
-        self.printable_positions[9 - old_row][old_file] = False
-        self.printable_positions[9 - new_row][new_file] = piece_ref
+        self.printable_positions[9 - old_row][old_col_no] = False
+        self.printable_positions[9 - new_row][new_col_no] = piece_ref
 
         # todo cleanup:
-        # - this is messed up, need to think of a better solution that printable_pos...
+        # - this is messed up, need to think of a better solution than printable_pos...
+
+    def print_state(self):
+        shout("\nboard positions", suffix="\n---------------")
+        pprint(self.positions)
+        shout("\nprintable positions", suffix="\n-------------------")
+        pprint(self.printable_positions)
+        print("")
 
 
 if __name__ == '__main__':

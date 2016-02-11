@@ -5,12 +5,10 @@ Called from python_chess.game
 from utils import (pos_to_cell_ref, col_no_to_letter, shout, VERBOSE, WRONG_ENTRY_POINT_MSG)
 
 
-# noinspection PyProtectedMember
-# (_file is not protected, just avoids conflict with file)
 class Move(object):
     """
     Capture characteristics of actual or potential moves e.g. amount 
-    to go up and right, new rank/_file etc. for easy comparison. 
+    to go up and right, new row/col_no etc. for easy comparison.
     """
 
 
@@ -25,8 +23,8 @@ class Move(object):
         self.right = right
 
         # not done as properties as these should not move with the piece
-        self.rank = piece.rank
-        self._file = piece._file
+        self.row = piece.row
+        self.col_no = piece.col_no
 
         # REVIEW - pass the following three in as func(s) from Game if need to save RAM
         self.occupied = occupied
@@ -47,10 +45,10 @@ class Move(object):
         self.possible, self.invalid_reason = self.check_move()
 
         if not self.possible:
-            if VERBOSE and not self.theoretical_move: 
+            if VERBOSE and not self.theoretical_move:
                 shout('move not allowed')
         else:
-            if VERBOSE and not self.theoretical_move: 
+            if VERBOSE and not self.theoretical_move:
                 shout('move allowed')
 
 
@@ -60,39 +58,31 @@ class Move(object):
 
     @property
     def pos(self):
-        return [self.rank, self._file]
-
-    @property
-    def row(self):
-        return self.rank
+        return [self.row, self.col_no]
 
     @property
     def col(self):
-        return col_no_to_letter(self._file)
+        return col_no_to_letter(self.col_no)
 
     @property
     def cell_ref(self):
         return pos_to_cell_ref(self.pos)
 
     @property
-    def new_rank(self):
-        return self.rank + self.up
+    def new_row(self):
+        return self.row + self.up
 
     @property
-    def new_file(self):
-        return self._file + self.right
+    def new_col_no(self):
+        return self.col_no + self.right
 
     @property
     def new_pos(self):
-        return [self.new_rank, self.new_file]
-
-    @property
-    def new_row(self):
-        return self.new_rank
+        return [self.new_row, self.new_col_no]
 
     @property
     def new_col(self):
-        return col_no_to_letter(self.new_file)
+        return col_no_to_letter(self.new_col_no)
 
     @property
     def new_cell_ref(self):
@@ -103,11 +93,11 @@ class Move(object):
         """
         Generate unique moveID based on piece_ref being moved and position of every other piece.
         """
-        _id = ('mv:' + self.piece.ref + "-" + str(self.rank * self._file) + "-" +
-               str(self.new_rank * self.new_file) + ",oth:")
+        _id = ('mv:' + self.piece.ref + "-" + str(self.row * self.col_no) + "-" +
+               str(self.new_row * self.new_col_no) + ",oth:")
         for ref, piece in self.their_team.items():
             if not piece.taken and ref != self.piece.ref:
-                _id = '+'.join([_id, (ref + '-' + str(piece.rank * piece._file))])
+                _id = '+'.join([_id, (ref + '-' + str(piece.row * piece.col_no))])
         return _id
 
 
@@ -137,7 +127,7 @@ class Move(object):
         """
         invalid_msg = 'Move is not allowed for this piece.'
         if VERBOSE and not self.theoretical_move:
-            print(str(self.move) + ' in ' + 
+            print(str(self.move) + ' in ' +
                   str([move[:2] for move in self.piece.valid_moves]) + '?')
         if self.move in [move[:2] for move in self.piece.valid_moves]:
             return 'okay'
@@ -150,7 +140,7 @@ class Move(object):
         """
         invalid_msg = ('Move is not allowed as it would go outside of ' +
                        'the board boundaries to: ' + self.new_cell_ref)
-        if self.new_rank in range(1, 9) and self.new_file in range(1, 9):
+        if self.new_row in range(1, 9) and self.new_col_no in range(1, 9):
             return 'okay'
         return invalid_msg
 
@@ -213,7 +203,7 @@ class Move(object):
                     break
 
         # allow for knights
-        else: 
+        else:
             if self.new_pos in self.our_team_cells:
                 invalid_msg = ('This move is blocked as ' + self.new_cell_ref +
                                ' is occupied by your team.')
@@ -239,7 +229,7 @@ class Move(object):
         for condition in conditions:
             if VERBOSE and not self.theoretical_move:
                 print('Checking condition: ' + str(condition))
-            
+
             if condition == 'on_first':
                 if self.piece.move_cnt > 0:
                     invalid_msg = ("A pawn can only move two spaces on it's " +
@@ -270,15 +260,15 @@ class Move(object):
         # need to temporarily update piece object, so that all of the theoretical
         # moves checked below will recognise the new position (i.e. as if you had
         # made the move).
-        self.piece.rank, self.piece._file = self.new_rank, self.new_file
+        self.piece.row, self.piece.col_no = self.new_row, self.new_col_no
         if self.take:
-            take_ref = [ref for ref in self.their_team.keys() 
+            take_ref = [ref for ref in self.their_team.keys()
                         if self.their_team[ref].pos == self.new_pos][0]
             taken_piece = self.their_team[take_ref]
             if taken_piece.name != 'king':
                 del self.their_team[take_ref]
-        self.occupied[self.occupied.index([self.rank, self._file])] = (
-            [self.new_rank, self.new_file])
+        self.occupied[self.occupied.index([self.row, self.col_no])] = (
+            [self.new_row, self.new_col_no])
 
         if self.piece.team == 'white':
             our_king, their_king = self.our_team['wK'], self.their_team['bK']
@@ -287,12 +277,12 @@ class Move(object):
 
         # iterate through dictionary of their pieces creating theoretical moves
         # attempting to take king, if possible then move would put you in check.
-        for ref, their_piece in self.their_team.items(): 
+        for ref, their_piece in self.their_team.items():
             up = our_king.row - their_piece.row
-            right = our_king._file - their_piece._file
+            right = our_king.col_no - their_piece.col_no
             # reverse our_team and their team args to switch
-            theoretical_move = Move(their_piece, up, right, self.occupied, 
-                                    self.their_team, self.our_team, 
+            theoretical_move = Move(their_piece, up, right, self.occupied,
+                                    self.their_team, self.our_team,
                                     theoretical_move=True,
                                     stop_recursion=True)
             if theoretical_move.possible:
@@ -303,8 +293,8 @@ class Move(object):
             del theoretical_move
 
         # revert piece to original position
-        self.piece.rank, self.piece._file = self.rank, self._file # revert to original pos
-        self.occupied[self.occupied.index(self.new_pos)] = [self.rank, self._file]
+        self.piece.row, self.piece.col_no = self.row, self.col_no  # revert to original pos
+        self.occupied[self.occupied.index(self.new_pos)] = [self.row, self.col_no]
         if self.take:
             self.occupied.append(self.new_pos)  # re-instate taken piece
             # noinspection PyUnboundLocalVariable

@@ -8,9 +8,11 @@ from piece import Piece
 from move import Move
 from literals import PIECE_CODES, START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
 # from chess_engine import pick_move
-from utils import (shout, write_log, cell_ref_to_pos, pos_to_cell_ref, VERBOSE)
+from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, VERBOSE
+from sys import exit
 
 LOG = ''
+
 
 class Game(object):
     """
@@ -79,6 +81,9 @@ class Game(object):
         scripts).
         """
         global LOG
+
+        if VERBOSE:
+            self.board.print_state()
         self.turns += 1
         self.current_team = team
         occupied, our_team, their_team = self.get_occupied()
@@ -132,8 +137,6 @@ class Game(object):
                 shout('game over, ' + self.current_team + ' team wins')
             if LOGGING:
                 write_log(LOG)
-            input('\nPress enter to close game...')
-            raise Exception('Game Finished')
 
     def __parse_prompt(self, prompt, our_team):
         """
@@ -157,15 +160,15 @@ class Game(object):
 
         # attempt to get details of piece to be moved (first two chars as current cell_ref)
         current_cell_ref = prompt[:2]
-        [cur_rank, cur_file] = cell_ref_to_pos(current_cell_ref)
-        piece_ref = self.board.get_piece_ref(cur_rank, cur_file)
+        [cur_row, cur_col_no] = cell_ref_to_pos(current_cell_ref)
+        piece_ref = self.board.get_piece_ref(cur_row, cur_col_no)
 
         if piece_ref:
             piece = self.pieces[piece_ref]
 
         try:
             # todo consider more efficient ways to achieve the same
-            assert ([cur_rank, cur_file] in [our_team[obj].pos for obj in our_team])
+            assert ([cur_row, cur_col_no] in [our_team[obj].pos for obj in our_team])
         except AssertionError:
             user_feedback = (
                 'A piece in your team could not be found in cell: {0}\n' +
@@ -173,8 +176,8 @@ class Game(object):
             return piece, up, right, hold_move, user_feedback
 
         # use last two characters as new cell_ref
-        [new_rank, new_file] = cell_ref_to_pos(prompt[-2:])
-        up, right = new_rank - cur_rank, new_file - cur_file
+        [new_row, new_col_no] = cell_ref_to_pos(prompt[-2:])
+        up, right = new_row - cur_row, new_col_no - cur_col_no
 
         if VERBOSE:
             print('piece_ref: {0} | up: {1} | right: {2}'.format(piece.ref, up, right))
@@ -214,14 +217,14 @@ class Game(object):
         global taken_piece
         occupied.remove(piece.pos)
         piece.move_cnt += 1
-        piece.rank += up
-        piece._file =+ right
+        piece.row += up
+        piece.col_no += right
         occupied.append(piece.pos)
 
         # check if anything was taken
         if move.take:
             # get ref of taken piece BEFORE board update
-            taken_piece_ref = self.board.get_piece_ref(move.new_rank, move.new_file)
+            taken_piece_ref = self.board.get_piece_ref(move.new_row, move.new_col_no)
             taken_piece = self.pieces[taken_piece_ref]
             taken_piece.taken = True
             # tmp TEST - check piece updated is object from game ###
@@ -263,8 +266,8 @@ class Game(object):
         # work out move required to get to their king
         their_king = (self.pieces['wK'] if self.current_team == 'black'
                       else self.pieces['bK'])
-        up = their_king.rank - piece.rank
-        right = their_king._file - piece._file
+        up = their_king.row - piece.row
+        right = their_king.col_no - piece.col_no
         if VERBOSE:
             print('..possible to move ' + piece.ref + ' from ' +
                   str(piece.pos) + ' to ' + str(their_king.pos) + '?')

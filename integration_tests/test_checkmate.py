@@ -1,9 +1,10 @@
-#!/usr/bin/python 
+#!/usr/bin/python
 """Unit test for chess.py - preventable checkmate"""
 from game import Game
 from time import sleep
+from utils import shout
 
-SLEEP_SECS = 0.2 # (less than 0.2 can cause issues with windows cmd prompt)
+SLEEP_SECS = 0.2  # (less than 0.2 can cause issues with windows cmd prompt)
 game = Game()
 
 
@@ -20,11 +21,11 @@ def main():
     simulate_turn('black', 'h4g3')
 
     try:
-        assert(game.checkmate)
-    except:
-        print("Game should be in checkmate now!")
-
-    print("If you got this far it probably worked!")
+        assert game.current_team == 'black'
+        assert game.checkmate
+        shout("Test worked")
+    except AssertionError:
+        print("Tests did not work - the game should be in checkmate now!")
 
 
 def simulate_turn(team, prompt_input):
