@@ -39,7 +39,7 @@ class Move(object):
         self.their_team_cells = [their_team[piece_ref].pos for piece_ref in their_team]
 
         # initialise variables to be set later...
-        self.check, self.take = None, False
+        self.take, self.check, self.checkmate = False, False, False
 
         # validate move
         self.possible, self.invalid_reason = self.check_move()

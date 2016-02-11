@@ -9,7 +9,6 @@ from move import Move
 from literals import PIECE_CODES, START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
 # from chess_engine import pick_move
 from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, VERBOSE
-from sys import exit
 
 LOG = ''
 
@@ -31,7 +30,7 @@ class Game(object):
                  }
     move_dict['queen'] = move_dict['rook'] + move_dict['bishop']
 
-    def __init__(self):
+    def __init__(self, turn_limit=200):
         """
         Initialise game object and create required member objects
         """
@@ -45,6 +44,8 @@ class Game(object):
         self.draw = False
         self.turns = 0
         self.current_team = None
+        self.turn_limit = turn_limit
+
 
     def __to_json(self):
         """
@@ -71,6 +72,7 @@ class Game(object):
                         name = PIECE_CODES[piece_ref[1]]
                         pieces[piece_ref] = Piece(piece_ref, name, team, row, col, move_dict[name])
         return pieces
+
 
     def take_turn(self, team, prompt=None, move=None):
         """
@@ -131,12 +133,14 @@ class Game(object):
 
         # wrap up if done...
         if self.checkmate or self.turns >= 200:
-            if self.turns >= 200:  # TODO - replace with self.draw once draw rules done
+            if self.turns >= self.turn_limit:  # TODO - replace with self.draw once draw rules done
                 shout(str(self.turns) + ' moves, lets call it a draw')
             elif self.checkmate:
+                move.checkmate = True
                 shout('game over, ' + self.current_team + ' team wins')
             if LOGGING:
                 write_log(LOG)
+
 
     def __parse_prompt(self, prompt, our_team):
         """
@@ -198,6 +202,7 @@ class Game(object):
         hold_move = False
         return piece, up, right, hold_move, user_feedback
 
+
     def get_occupied(self):
         """
         Produce list of occupied cells and current teams, pieces.
@@ -213,6 +218,7 @@ class Game(object):
                 else:
                     their_team[ref] = piece
         return occupied, our_team, their_team
+
 
     def __process_move(self, piece, move, up, right, occupied, our_team, their_team):
         """
@@ -232,31 +238,27 @@ class Game(object):
             taken_piece_ref = self.board.get_piece_ref(move.new_row, move.new_col_no)
             taken_piece = self.pieces[taken_piece_ref]
             taken_piece.taken = True
-            # tmp TEST - check piece updated is object from game ###
-            assert self.pieces[taken_piece.ref].taken
-            ########################################################
-            if VERBOSE:
-                shout('taken piece: ' + taken_piece.ref)
+            assert self.pieces[taken_piece.ref].taken  # todo -replace with unit test
+            shout('taken piece: ' + taken_piece.ref)
 
         # update board
         self.board.update_board(move.pos, move.new_pos, piece.ref)
 
-        # tmp TEST - see if refresh of get_occupied is needed #############
-        assert our_team[piece.ref].pos == piece.pos
+        assert our_team[piece.ref].pos == piece.pos  # todo -replace with unit test
         if move.take:
             assert their_team[taken_piece.ref].taken
-        # occupied, our_team, their_team = self.get_occupied() # refresh
-        ###################################################################
 
         # other player in check?
         self.check = self.__in_check(piece, occupied, our_team, their_team)
         if self.check:
+            move.check = True
             other_team = ('black' if self.current_team == 'white' else 'white')
             shout(other_team + ' team in check')
             print('looking for checkmate....\n')
 
             # other player in checkmate?
             self.checkmate = self.__in_checkmate(occupied, our_team, their_team)
+
 
     def __in_check(self, piece, occupied, our_team, their_team):
         """
@@ -285,6 +287,7 @@ class Game(object):
                 print('..invalid_reason: ' + theoretical_move.invalid_reason)
             return False
 
+
     def __in_checkmate(self, occupied, our_team, their_team):
         """
         Determine whether the opponents king is in checkmate, done
@@ -308,6 +311,7 @@ class Game(object):
                       "display all possible moves)")
                 return False
         return True
+
 
     def get_all_possible_moves(self, occupied=None, our_team=None,
                                their_team=None, pieces=None,
