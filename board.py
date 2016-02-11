@@ -56,7 +56,7 @@ class Board(object):
 
             # if line where a pieces could go
             elif i % row_height == 2:
-                line = "  " + self.printable_positions[row][0][0] + "  " + sep
+                line = "  {0}  {1}".format(self.printable_positions[row][0][0], sep)
                 for col in cols[1:]:
                     if self.printable_positions[row][col]:
                         piece = self.printable_positions[row][col][:2]

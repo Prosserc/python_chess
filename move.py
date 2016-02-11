@@ -24,6 +24,10 @@ class Move(object):
         self.up = up
         self.right = right
 
+        # not done as properties as these should not move with the piece
+        self.rank = piece.rank
+        self._file = piece._file
+
         # REVIEW - pass the following three in as func(s) from Game if need to save RAM
         self.occupied = occupied
         self.our_team = our_team
@@ -37,7 +41,7 @@ class Move(object):
         self.their_team_cells = [their_team[piece_ref].pos for piece_ref in their_team]
 
         # initialise variables to be set later...
-        self.check, self.take, self.in_new_pos = None, False, False
+        self.check, self.take = None, False
 
         # validate move
         self.possible, self.invalid_reason = self.check_move()
@@ -55,36 +59,28 @@ class Move(object):
         return [self.up, self.right]
 
     @property
-    def rank(self):
-        return self.piece.rank
-
-    @property
-    def _file(self):
-        return self.piece._file
-
-    @property
     def pos(self):
-        return self.piece.pos
+        return [self.rank, self._file]
 
     @property
     def row(self):
-        return self.piece.rank
+        return self.rank
 
     @property
     def col(self):
-        return col_no_to_letter(self.piece._file)
+        return col_no_to_letter(self._file)
 
     @property
     def cell_ref(self):
-        return self.piece.cell_ref
+        return pos_to_cell_ref(self.pos)
 
     @property
     def new_rank(self):
-        return self.rank + (0 if self.in_new_pos else self.up)
+        return self.rank + self.up
 
     @property
     def new_file(self):
-        return self._file + (0 if self.in_new_pos else self.right)
+        return self._file + self.right
 
     @property
     def new_pos(self):
@@ -274,16 +270,14 @@ class Move(object):
         # need to temporarily update piece object, so that all of the theoretical
         # moves checked below will recognise the new position (i.e. as if you had
         # made the move).
-        old_rank, old_file, old_pos = self.rank, self._file, self.pos  # copy for reverting
         self.piece.rank, self.piece._file = self.new_rank, self.new_file
-        self.in_new_pos = True
         if self.take:
             take_ref = [ref for ref in self.their_team.keys() 
                         if self.their_team[ref].pos == self.new_pos][0]
             taken_piece = self.their_team[take_ref]
             if taken_piece.name != 'king':
                 del self.their_team[take_ref]
-        self.occupied[self.occupied.index([old_rank, old_file])] = (
+        self.occupied[self.occupied.index([self.rank, self._file])] = (
             [self.new_rank, self.new_file])
 
         if self.piece.team == 'white':
@@ -309,9 +303,8 @@ class Move(object):
             del theoretical_move
 
         # revert piece to original position
-        self.piece.rank, self.piece._file = old_rank, old_file
-        self.in_new_pos = False
-        self.occupied[self.occupied.index(self.new_pos)] = [old_rank, old_file]
+        self.piece.rank, self.piece._file = self.rank, self._file # revert to original pos
+        self.occupied[self.occupied.index(self.new_pos)] = [self.rank, self._file]
         if self.take:
             self.occupied.append(self.new_pos)  # re-instate taken piece
             # noinspection PyUnboundLocalVariable
