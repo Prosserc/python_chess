@@ -159,8 +159,14 @@ class Game(object):
             return piece, up, right, hold_move, user_feedback
 
         # attempt to get details of piece to be moved (first two chars as current cell_ref)
-        current_cell_ref = prompt[:2]
-        [cur_row, cur_col_no] = cell_ref_to_pos(current_cell_ref)
+        try:
+            current_cell_ref = prompt[:2]
+            [cur_row, cur_col_no] = cell_ref_to_pos(current_cell_ref)
+        except (IndexError, ValueError):
+            user_feedback = ('A valid cell for your current position could not be found\n' +
+                '(using the first two characters from your entry: "{0}")').format(prompt)
+            return piece, up, right, hold_move, user_feedback
+
         piece_ref = self.board.get_piece_ref(cur_row, cur_col_no)
 
         if piece_ref:
@@ -170,8 +176,7 @@ class Game(object):
             # todo consider more efficient ways to achieve the same
             assert ([cur_row, cur_col_no] in [our_team[obj].pos for obj in our_team])
         except AssertionError:
-            user_feedback = (
-                'A piece in your team could not be found in cell: {0}\n' +
+            user_feedback = ('A piece in your team could not be found in cell: {0}\n' +
                 '(using the first two characters from your entry)').format(current_cell_ref)
             return piece, up, right, hold_move, user_feedback
 
