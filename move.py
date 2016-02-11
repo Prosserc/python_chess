@@ -68,11 +68,11 @@ class Move(object):
 
     @property
     def row(self):
-        return self.rank
+        return self.piece.rank
 
     @property
     def col(self):
-        return col_no_to_letter(self._file)
+        return col_no_to_letter(self.piece._file)
 
     @property
     def cell_ref(self):
@@ -80,11 +80,11 @@ class Move(object):
 
     @property
     def new_rank(self):
-        return self.rank + 0 if self.in_new_pos else self.up
+        return self.rank + (0 if self.in_new_pos else self.up)
 
     @property
     def new_file(self):
-        return self._file + 0 if self.in_new_pos else self.up
+        return self._file + (0 if self.in_new_pos else self.right)
 
     @property
     def new_pos(self):

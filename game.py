@@ -177,7 +177,7 @@ class Game(object):
         up, right = new_rank - cur_rank, new_file - cur_file
 
         if VERBOSE:
-            print('piece_ref: {0} | up: {1} | right: {2}'.format(piece.ref), str(up), str(right))
+            print('piece_ref: {0} | up: {1} | right: {2}'.format(piece.ref, up, right))
 
         # attempt to get destination...
         try:
