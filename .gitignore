@@ -3,8 +3,6 @@ __pycache__/
 *.py[cod]
 
 # ignore sub directories not intended for repo
+log.json
 *plans/
 .idea/
-.idea/misc.xml
-.idea/workspace.xml
-.idea/python_chess.iml

@@ -2,7 +2,7 @@
 """
 Called from python_chess.game. This version is used for ASCII mode.
 """
-from utils import verbose, col_no_to_letter, WRONG_ENTRY_POINT_MSG, shout
+from utils import col_no_to_letter, WRONG_ENTRY_POINT_MSG, shout, debug
 from pprint import pprint
 
 
@@ -84,8 +84,8 @@ class Board(object):
         Get a piece object from the positions list.
         """
         col = col_no_to_letter(col_no)
-        if verbose:
-            print("self.positions[row][col] set to {0}".format(self.positions[row][col]))
+        debug("in board.get_piece_ref() self.positions[row][col] set to {0}".format(
+            self.positions[row][col]))
         return self.positions[row][col]   
 
 

@@ -20,16 +20,19 @@ ASCII_OFFSET = 64  # used to convert numbers to ascii letter codes
 WRONG_ENTRY_POINT_MSG = "This module is not intended to be the main entry point for the" + \
                         "program, call python_chess.game to start a new game."
 DEFAULT_DEBUG_LEVEL = DebugLevel.low
-
-verbose = False ## todo replace with DEBUG_LEVEL when ready
 current_debug_level = DebugLevel.low
 
 
-def debug(msg, level=DebugLevel.low, print_func=print()):
-    """Use like the print function, messages will only be printed if debug_level
+def _no_filter():
+    return True
+
+
+def debug(msg, level=DebugLevel.low, print_func=print, filter_func=_no_filter):
+    """
+    Use like the print function, messages will only be printed if debug_level
     is less than or equal to the constant DEBUG_LEVEL.
     """
-    if level.value <= current_debug_level.value:
+    if level.value <= current_debug_level.value and filter_func():
         print_func(msg)
 
 
@@ -37,24 +40,25 @@ def set_debugging_level(level, feedback_required=False):
     """
     Set the current debug level. Use a DebugLevel or a string.
     """
+    global current_debug_level
+
     if isinstance(level, DebugLevel):
         current_debug_level = level
-
-    if not level:
+    elif not level:
         print("debug level not provided, setting to low")
         current_debug_level = DebugLevel.low
-
-    debug_code  = level[0].lower()
-
-    if debug_code == 'h':
-        current_debug_level = DebugLevel.high
-    elif debug_code == 'm':
-        current_debug_level = DebugLevel.mid
-    elif debug_code == 'l':
-        current_debug_level = DebugLevel.low
     else:
-        print("unable to interpret debug level requested ({0}), setting to low".format(level))
-        current_debug_level = DebugLevel.low
+        debug_code  = level[0].lower()
+
+        if debug_code == 'h':
+            current_debug_level = DebugLevel.high
+        elif debug_code == 'm':
+            current_debug_level = DebugLevel.mid
+        elif debug_code == 'l':
+            current_debug_level = DebugLevel.low
+        else:
+            print("unable to interpret debug level requested ({0}), setting to low".format(level))
+            current_debug_level = DebugLevel.low
 
     if feedback_required:
         return "Debugging  level set to {0}".format(current_debug_level.name)
