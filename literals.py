@@ -18,7 +18,7 @@ START_POSITIONS = {
     2: dict(A='wp1', B='wp2', C='wp3', D='wp4', E='wp5', F='wp6', G='wp7', H='wp8'),
     1: dict(A='wR1', B='wN1', C='wB1', D='wQ', E='wK', F='wB2', G='wN2', H='wR2')}
 
-LOGGING = False
+LOGGING = True
 
 MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for the piece you "
         "want to move and the cell reference for the new location. The first two characters of "

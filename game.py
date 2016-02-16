@@ -8,7 +8,7 @@ from piece import Piece
 from move import Move
 from literals import PIECE_CODES, START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
 # from chess_engine import pick_move
-from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, VERBOSE
+from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, debug, DebugLevel, set_debugging_level
 
 LOG = ''
 
@@ -84,8 +84,7 @@ class Game(object):
         """
         global LOG
 
-        if VERBOSE:
-            self.board.print_state()
+        debug(self.board.print_state(), DebugLevel.high)
         self.turns += 1
         self.current_team = team
         occupied, our_team, their_team = self.get_occupied()
@@ -146,20 +145,26 @@ class Game(object):
         """
         Determine piece to be moved and move required from prompt.
         """
-        global VERBOSE
         # setup return defaults
         piece, up, right, hold_move, user_feedback = None, None, None, True, None
 
         # first check for special commands
         if prompt.lower()[:5] == 'debug':
-            VERBOSE = not VERBOSE
-            user_feedback = "Debugging {0}".format("on" if VERBOSE else "off")
+            level_text = prompt[5:].strip()
+            user_feedback = set_debugging_level(level_text, feedback_required=True)
             return piece, up, right, hold_move, user_feedback
         elif prompt.lower() == 'redraw':
             print(self.board.draw_board())
             return piece, up, right, hold_move, user_feedback
         elif prompt.lower()[:4] == 'list':
             self.get_all_possible_moves(list_moves=True)
+            return piece, up, right, hold_move, user_feedback
+        elif prompt.lower() == 'log':
+            if LOGGING:
+                write_log(LOG)
+                user_feedback = "Log written to current working directory"
+            else:
+                user_feedback = "Logging not currently enabled, change in literals.py"
             return piece, up, right, hold_move, user_feedback
 
         # attempt to get details of piece to be moved (first two chars as current cell_ref)
@@ -188,8 +193,8 @@ class Game(object):
         [new_row, new_col_no] = cell_ref_to_pos(prompt[-2:])
         up, right = new_row - cur_row, new_col_no - cur_col_no
 
-        if VERBOSE:
-            print('piece_ref: {0} | up: {1} | right: {2}'.format(piece.ref, up, right))
+        debug('piece_ref: {0} | up: {1} | right: {2}'.format(piece.ref, up, right),
+              DebugLevel.mid)
 
         # attempt to get destination...
         try:
@@ -239,7 +244,7 @@ class Game(object):
             taken_piece = self.pieces[taken_piece_ref]
             taken_piece.taken = True
             assert self.pieces[taken_piece.ref].taken  # todo -replace with unit test
-            shout('taken piece: ' + taken_piece.ref)
+            debug('taken piece: ' + taken_piece.ref, DebugLevel.low, print_func=shout)
 
         # update board
         self.board.update_board(move.pos, move.new_pos, piece.ref)
@@ -267,24 +272,21 @@ class Game(object):
         position to their King's position to see if the move would be 
         valid.
         """
-        if VERBOSE:
-            print('Checking if other player is in check...')
+        debug('Checking if other player is in check...', DebugLevel.mid)
 
         # work out move required to get to their king
         their_king = (self.pieces['wK'] if self.current_team == 'black'
                       else self.pieces['bK'])
         up = their_king.row - piece.row
         right = their_king.col_no - piece.col_no
-        if VERBOSE:
-            print('..possible to move ' + piece.ref + ' from ' +
-                  str(piece.pos) + ' to ' + str(their_king.pos) + '?')
+        debug('..possible to move ' + piece.ref + ' from ' +
+              str(piece.pos) + ' to ' + str(their_king.pos) + '?', DebugLevel.mid)
         theoretical_move = Move(piece, up, right, occupied, our_team,
                                 their_team, theoretical_move=True)
         if theoretical_move.possible:
             return True
         else:
-            if VERBOSE:
-                print('..invalid_reason: ' + theoretical_move.invalid_reason)
+            debug('..invalid_reason: ' + theoretical_move.invalid_reason, DebugLevel.mid)
             return False
 
 
@@ -304,8 +306,7 @@ class Game(object):
             all_moves, cnt = self.get_all_possible_moves(occupied=occupied,
                                                          our_team=their_team,
                                                          their_team=our_team,
-                                                         pieces=p_dict,
-                                                         list_moves=VERBOSE)
+                                                         pieces=p_dict)
             if cnt > 0:
                 print("Not checkmate (type list at prompt if you want to " +
                       "display all possible moves)")

@@ -2,7 +2,7 @@
 """
 Called from python_chess.game
 """
-from utils import (pos_to_cell_ref, col_no_to_letter, shout, VERBOSE, WRONG_ENTRY_POINT_MSG)
+from utils import (pos_to_cell_ref, col_no_to_letter, shout, verbose, WRONG_ENTRY_POINT_MSG)
 
 
 class Move(object):
@@ -45,10 +45,10 @@ class Move(object):
         self.possible, self.invalid_reason = self.check_move()
 
         if not self.possible:
-            if VERBOSE and not self.theoretical_move:
+            if verbose and not self.theoretical_move:
                 shout('move not allowed')
         else:
-            if VERBOSE and not self.theoretical_move:
+            if verbose and not self.theoretical_move:
                 shout('move allowed')
 
 
@@ -113,7 +113,7 @@ class Move(object):
 
         for func in filters:
             result = func()
-            if VERBOSE and not self.theoretical_move:
+            if verbose and not self.theoretical_move:
                 print(func.__doc__ + ' - ' + result)
             if result != 'okay':
                 return False, result  # stop at first invalid reason for performance
@@ -126,7 +126,7 @@ class Move(object):
         Check move against piece.valid_moves
         """
         invalid_msg = 'Move is not allowed for this piece.'
-        if VERBOSE and not self.theoretical_move:
+        if verbose and not self.theoretical_move:
             print(str(self.move) + ' in ' +
                   str([move[:2] for move in self.piece.valid_moves]) + '?')
         if self.move in [move[:2] for move in self.piece.valid_moves]:
@@ -165,20 +165,20 @@ class Move(object):
                     [tmp_pos[0] + up, tmp_pos[1] + right]
                     for up, right in [mv[:2] for mv in self.piece.one_space_moves]
                     if tmp_pos[0] + up in range(1, 9) and tmp_pos[1] + right in range(1, 9)]
-                if VERBOSE and not self.theoretical_move:
+                if verbose and not self.theoretical_move:
                     print('Possible steps: ' + ', '.join(str(i) for i in poss_steps))
 
                 distances = [distance(i, self.new_pos) for i in poss_steps]
-                if VERBOSE and not self.theoretical_move:
+                if verbose and not self.theoretical_move:
                     print('Distances: ' + ', '.join(str(i) for i in distances))
 
                 correct_step = poss_steps[distances.index(min(distances))]
-                if VERBOSE and not self.theoretical_move:
+                if verbose and not self.theoretical_move:
                     print('Min dist: ' + str(min(distances)))
                     print('Correct step: ' + str(correct_step))
 
                 tmp_pos = correct_step
-                if VERBOSE and not self.theoretical_move:
+                if verbose and not self.theoretical_move:
                     print('tmp_pos: ' + str(tmp_pos))
 
                 # check if cell on the way is occupied
@@ -227,7 +227,7 @@ class Move(object):
             return 'okay'  # no conditions on move
 
         for condition in conditions:
-            if VERBOSE and not self.theoretical_move:
+            if verbose and not self.theoretical_move:
                 print('Checking condition: ' + str(condition))
 
             if condition == 'on_first':
