@@ -84,7 +84,6 @@ class Game(object):
         """
         global LOG
 
-        debug(self.board.print_state(), DebugLevel.high)
         self.turns += 1
         self.current_team = team
         occupied, our_team, their_team = self.get_occupied()
