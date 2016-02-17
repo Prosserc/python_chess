@@ -6,7 +6,8 @@ from enum import Enum
 
 
 class DebugLevel(Enum):
-    """Debug messages will be printed if classified as less than or equal to
+    """
+    Debug messages will be printed if classified as less than or equal to
     the level the program is running in.
     """
     none = 0
@@ -111,24 +112,6 @@ def write_log(log):
     print('\nLogging game data...')
     file_obj.writelines(log)
     file_obj.close()
-
-
-def list_agg(operator='+', *args):
-    """
-    Perform an aggregation of lists by the operator supplied e.g.
-    list_agg('+'. [3, 6], [2, 2]) would return [5, 7]. The number of
-    lists supplied is arbitrary, but each list must have the same 
-    number of elements.
-    """
-    l = len(args[1])
-    res = args[0]
-    for i, arg in enumerate(args[1:]):
-        if len(arg) != l:
-            raise Exception("The length of all arguments must be the same")
-        for j, item in enumerate(arg):
-            cmd = "res[j] " + operator + "= " + str(item)
-            exec(cmd)
-    return res
 
 
 def shout(msg, suffix=' !!!', print_output=True, return_output=False):

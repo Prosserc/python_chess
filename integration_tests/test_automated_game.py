@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-"""Integration test for chess.py - an automated game."""
+"""
+Integration test for chess.py - an automated game.
+"""
 from game import Game
 from random import random as rnd
 from time import sleep
@@ -14,6 +16,7 @@ CHECKMATE_POINTS = float("inf")
 SLEEP_SECS = 0.2  # (less than 0.2 can cause issues with windows cmd prompt)
 DRAWING_ON = True
 
+
 def get_points(game, move_obj):
     take_ref = game.board.positions[move_obj.new_row][move_obj.new_col]
     points = PIECE_VALS[game.pieces[take_ref].name]
@@ -23,11 +26,12 @@ def get_points(game, move_obj):
         points += CHECK_POINTS
     return points
 
+
 def pick_rnd(lst, cnt=None):
     """Returns a random item from a list."""
     if not cnt:
         cnt = len(lst)
-    i = int(rnd()*(cnt-1)) # -1 needed to allow for zero based indexing
+    i = int(rnd() * (cnt - 1))  # -1 needed to allow for zero based indexing
     return lst[i]
 
 
@@ -73,8 +77,8 @@ def level2_move(game, team):
     """Level 2 - Find all possible moves, and all possible responses,
     score by value of pieces taken (minus any taken from yours),
     select one resulting in the best points."""
-    ## TO FOLLOW
-    ## re-write at some point as generic function to look any number of levels...
+    # TO FOLLOW
+    # re-write at some point as generic function to look any number of levels...
     state = "ready for tests - probably not working"
     func_name = stack()[0][3]
     if state.find("ready") != 0:
@@ -95,7 +99,7 @@ def level2_move(game, team):
                     if their_mv_obj.take:
                         if their_mv_obj.take:
                             their_take_ref = \
-                               game.board.positions[their_mv_obj.new_row][their_mv_obj.new_col]
+                                game.board.positions[their_mv_obj.new_row][their_mv_obj.new_col]
                             points -= PIECE_VALS[game.pieces[their_take_ref].name]
                     if points > max_points:
                         max_points, selected_move = points, move_obj
@@ -109,8 +113,8 @@ def level3_move(game, team):
     """Level 3 - Find all possible moves to 3 turns score by value of
     pieces taken (minus any taken from yours), select one resulting in
     the best points."""
-    ## TO FOLLOW
-    ## rewrite at some point as generic function to look any number of levels...
+    # TO FOLLOW
+    # rewrite at some point as generic function to look any number of levels...
     state = "definitely not working"
     func_name = stack()[0][3]
     if state.find("ready") != 0:
@@ -124,20 +128,20 @@ def level3_move(game, team):
             possible_moves.append(move_obj)
             if move_obj.take:
                 take_ref = \
-                   game.board.positions[move_obj.new_row][move_obj.new_col]
+                    game.board.positions[move_obj.new_row][move_obj.new_col]
                 points += PIECE_VALS[game.pieces[take_ref].name]
             resp_moves, cnt2 = game.get_all_possible_moves(team=('white' if team == 'black' else 'black'))
             for mv2_pref, mv2_lst in resp_moves.items():
                 for mv2_obj in mv2_lst:
                     if mv2_obj.take:
                         mv2_take_ref = \
-                           game.board.positions[mv2_obj.new_row][mv2_obj.new_col]
+                            game.board.positions[mv2_obj.new_row][mv2_obj.new_col]
                         points -= PIECE_VALS[game.pieces[mv2_take_ref].name]
                     for mv3_pref, mv3_lst in resp_moves.items():
                         for mv3_obj in mv3_lst:
                             if mv3_obj.take:
                                 mv3_take_ref = \
-                                   game.board.positions[mv3_obj.new_row][mv3_obj.new_col]
+                                    game.board.positions[mv3_obj.new_row][mv3_obj.new_col]
                                 points -= PIECE_VALS[game.pieces[mv3_take_ref].name]
                         if points > max_points:
                             max_points, selected_move = points, move_obj
