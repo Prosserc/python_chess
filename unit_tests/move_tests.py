@@ -18,3 +18,6 @@ class TestUtils(unittest.TestCase):
 
         if piece_ref:
             piece = self.test_game.pieces[piece_ref]
+
+if __name__ == "__main__":
+    unittest.main()
