@@ -42,7 +42,7 @@ class Move(object):
         self.take, self.check, self.checkmate = False, False, False
 
         # validate move
-        self.possible, self.invalid_reason = self.check_move()
+        self.possible, self.invalid_reason = self.__check_move()
 
         if not self.possible:
             debug('move not allowed', print_func=shout,
@@ -105,7 +105,7 @@ class Move(object):
         return _id
 
 
-    def check_move(self):
+    def __check_move(self):
         """
         Run checks to see whether a move is possible.
         """
