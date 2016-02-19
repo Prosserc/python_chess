@@ -13,7 +13,7 @@ class Piece(object):
     """
 
 
-    def __init__(self, ref, name, team, row, col, piece_moves):
+    def __init__(self, ref, name, team, row, col, piece_moves, move_cnt=0):
         """
         Get attributes required for piece.
         """
@@ -23,7 +23,7 @@ class Piece(object):
         self.row = int(row)
         self.col_no = col_letter_to_no(col)
         self.valid_moves = self.get_valid_moves(piece_moves)
-        self.move_cnt = 0
+        self.move_cnt = move_cnt
         self.taken = False
 
         # note knights ability to jump

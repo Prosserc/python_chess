@@ -30,7 +30,7 @@ class Game(object):
                  }
     move_dict['queen'] = move_dict['rook'] + move_dict['bishop']
 
-    def __init__(self, turn_limit=200, custom_start_positions=None):
+    def __init__(self, turn_limit=200, custom_start_positions=None, current_turn=0):
         """
         Initialise game object and create required member objects
         """
@@ -52,8 +52,7 @@ class Game(object):
         """
         Output entire object contents as json.
         """
-        return json.dumps(self, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=4)
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     @staticmethod
     def __create_pieces(move_dict, start_pos):
@@ -71,6 +70,13 @@ class Game(object):
                     if piece_ref:
                         team = TEAMS[piece_ref[0]]
                         name = PIECE_CODES[piece_ref[1]]
+
+                        # doesn't matter what actual move_cnt is, just needs to be >= 1 if moved
+                        if DEFAULT_START_POSITIONS[row][col] == start_pos[row][col]:
+                            move_cnt = 0
+                        else:
+                            move_cnt = 1
+
                         pieces[piece_ref] = Piece(piece_ref, name, team, row, col, move_dict[name])
         return pieces
 

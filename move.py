@@ -264,6 +264,7 @@ class Move(object):
         # need to temporarily update piece object, so that all of the theoretical
         # moves checked below will recognise the new position (i.e. as if you had
         # made the move).
+        # TODO - review, consider making a tmp copy of their team to work with instead
         self.piece.row, self.piece.col_no = self.new_row, self.new_col_no
         if self.take:
             take_ref = [ref for ref in self.their_team.keys()
