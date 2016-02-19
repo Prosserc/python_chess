@@ -179,7 +179,7 @@ class Game(object):
         piece_ref = self.board.get_piece_ref(cur_row, cur_col_no)
 
         if piece_ref:
-            piece = self.pieces[piece_ref]
+            piece = self.get_piece(piece_ref)
 
         try:
             # todo consider more efficient ways to achieve the same
@@ -241,9 +241,9 @@ class Game(object):
         if move.take:
             # get ref of taken piece BEFORE board update
             taken_piece_ref = self.board.get_piece_ref(move.new_row, move.new_col_no)
-            taken_piece = self.pieces[taken_piece_ref]
+            taken_piece = self.get_piece(taken_piece_ref)
             taken_piece.taken = True
-            assert self.pieces[taken_piece.ref].taken  # todo -replace with unit test
+            assert self.get_piece(taken_piece.ref).taken  # todo -replace with unit test
             debug('taken piece: ' + taken_piece.ref, DebugLevel.low, print_func=shout)
 
         # update board
@@ -275,8 +275,8 @@ class Game(object):
         debug('Checking if other player is in check...', DebugLevel.mid)
 
         # work out move required to get to their king
-        their_king = (self.pieces['wK'] if self.current_team == 'black'
-                      else self.pieces['bK'])
+        their_king = (self.get_piece('wK') if self.current_team == 'black'
+                      else self.get_piece('bK'))
         up = their_king.row - piece.row
         right = their_king.col_no - piece.col_no
         debug('..possible to move ' + piece.ref + ' from ' +
@@ -358,12 +358,19 @@ class Game(object):
         if list_moves:
             print('\nPossible moves:')
             for ref, moves in iter(sorted(all_possible_moves.items())):
-                print(self.pieces[ref].name.ljust(6) +
+                print(self.get_piece(ref).name.ljust(6) +
                       (' (' + ref + ')').ljust(5) + ': ' +
                       ', '.join([pos_to_cell_ref(obj.new_pos) for obj in moves]))
             _ = input("Press enter to continue")
 
         return all_possible_moves, cnt
+
+
+    def get_piece(self, piece_ref):
+        """
+        Takes a piece_ref e.g. 'wp1' and returns the corresponding piece object
+        """
+        return self.pieces[piece_ref]
 
 
 def main():

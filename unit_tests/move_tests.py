@@ -7,19 +7,29 @@ from move import Move
 class TestUtils(unittest.TestCase):
 
 
+    def custom_set_up(self, piece_ref, up, right, custom_start_pos=None):
+        """
+        Creates a move object for the specified piece and sets self.move
+        :param piece_ref: e.g. 'bR1' | 'wN1' | 'bB1' | 'wQ' | 'bK' | 'wp1'
+        :param up: an int for the number of rows to move forward
+                   (note: negative numbers will move forward for black pieces)
+        :param right: an int for the number of columns to move right (negative for left)
+        :param custom_start_pos: optional: leave empty for default game start
+        """
+        self.game = Game(custom_start_positions=custom_start_pos)
+        self.game.current_team = TEAMS[piece_ref[0]]
+        self.piece = self.game.get_piece(piece_ref)
+        occupied, our_team, their_team = self.game.get_occupied()
+        self.move = Move(self.piece, up, right, occupied, our_team, their_team)
+
+
     def test_initial_move(self):
-        test = Game()
-
-        # set up specific to this test...
-        row, col = 2, 1
-        test.current_team = TEAMS['w']
-        occupied, our_team, their_team = test.get_occupied()
-        piece_ref = test.board.get_piece_ref(row, col)
-        piece = test.pieces[piece_ref]
-        move = Move(piece, 2, 0, occupied, our_team, their_team)
-
-        self.assertTrue(move.possible)
-        self.assertEqual(move.new_cell_ref, "A4")
+        """
+        Test the first move of the game
+        """
+        self.custom_set_up('wp1', 2, 0)
+        self.assertTrue(self.move.possible)
+        self.assertEqual(self.move.new_cell_ref, "A4")
 
 
     def test_pawn_taking(self):
@@ -34,12 +44,10 @@ class TestUtils(unittest.TestCase):
             2: dict(A=False, B='wp2', C='wp3', D='wp4', E='wp5', F='wp6', G='wp7', H='wp8'),
             1: dict(A='wR1', B='wN1', C='wB1', D='wQ', E='wK', F='wB2', G='wN2', H='wR2')}
 
-        test = Game(custom_start_positions=start_pos)
-
-
-    @staticmethod
-    def __helper_get_piece(game, piece_ref):
-        pass # todo
+        self.custom_set_up('wp1', 1, 1, custom_start_pos=start_pos)
+        self.assertTrue(self.move.possible,
+                        msg="invalid reason: {0}".format(self.move.invalid_reason))
+        self.assertEqual(self.move.new_cell_ref, "B5")
 
 
 if __name__ == "__main__":
