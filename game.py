@@ -37,7 +37,7 @@ class Game(object):
         start_pos = custom_start_positions or DEFAULT_START_POSITIONS
 
         self.board = Board(start_pos)
-        self.pieces = self.__create_pieces(Game.move_dict)
+        self.pieces = self.__create_pieces(Game.move_dict, start_pos)
 
         # initialise variables that will be needed later
         self.check = False
@@ -56,7 +56,7 @@ class Game(object):
                           sort_keys=True, indent=4)
 
     @staticmethod
-    def __create_pieces(move_dict):
+    def __create_pieces(move_dict, start_pos):
         """
         Creates a object for each piece and creates a dictionary to
         enable access to the pieces via their ref. 
@@ -65,7 +65,7 @@ class Game(object):
         """
         pieces = {}
 
-        for row, row_content in DEFAULT_START_POSITIONS.items():
+        for row, row_content in start_pos.items():
             if row > 0:
                 for col, piece_ref in row_content.items():
                     if piece_ref:
