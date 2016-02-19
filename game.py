@@ -77,7 +77,8 @@ class Game(object):
                         else:
                             move_cnt = 1
 
-                        pieces[piece_ref] = Piece(piece_ref, name, team, row, col, move_dict[name])
+                        pieces[piece_ref] = Piece(piece_ref, name, team, row, col,
+                                                  move_dict[name], move_cnt)
         return pieces
 
 

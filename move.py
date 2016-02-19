@@ -247,7 +247,7 @@ class Move(object):
                     self.piece.valid_moves.remove(self.move + [condition])  # todo - check logic seems iffy
             #   T O   F O L L O W . . . (todo)
             elif condition == 'en_passant':
-                invalid_msg = "Sorry " + condition + " rule not coded yet."
+                invalid_msg = "Sorry {0} rule not coded yet.".format(condition)
                 return invalid_msg
         return 'okay'
 
@@ -291,7 +291,7 @@ class Move(object):
                                     theoretical_move=True,
                                     stop_recursion=True)
             if theoretical_move.possible:
-                invalid_msg = ('You cannot move to this space as it would put ' +
+                invalid_msg = ('You cannot move to this space as it would leave ' +
                                'your king in check with the ' + their_piece.name +
                                ' in cell ' + theoretical_move.cell_ref)
                 break  # cannot return here as need to revert position etc.
