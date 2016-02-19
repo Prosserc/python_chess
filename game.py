@@ -6,7 +6,7 @@ import json
 from board import Board
 from piece import Piece
 from move import Move
-from literals import PIECE_CODES, START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
+from literals import PIECE_CODES, DEFAULT_START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
 # from chess_engine import pick_move
 from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, debug, DebugLevel, set_debugging_level
 
@@ -30,12 +30,13 @@ class Game(object):
                  }
     move_dict['queen'] = move_dict['rook'] + move_dict['bishop']
 
-    def __init__(self, turn_limit=200):
+    def __init__(self, turn_limit=200, custom_start_positions=None):
         """
         Initialise game object and create required member objects
         """
+        start_pos = custom_start_positions or DEFAULT_START_POSITIONS
 
-        self.board = Board(START_POSITIONS)
+        self.board = Board(start_pos)
         self.pieces = self.__create_pieces(Game.move_dict)
 
         # initialise variables that will be needed later
@@ -64,7 +65,7 @@ class Game(object):
         """
         pieces = {}
 
-        for row, row_content in START_POSITIONS.items():
+        for row, row_content in DEFAULT_START_POSITIONS.items():
             if row > 0:
                 for col, piece_ref in row_content.items():
                     if piece_ref:
