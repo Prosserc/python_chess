@@ -197,7 +197,13 @@ class Game(object):
             return piece, up, right, hold_move, user_feedback
 
         # use last two characters as new cell_ref
-        [new_row, new_col_no] = cell_ref_to_pos(prompt[-2:])
+        try:
+            [new_row, new_col_no] = cell_ref_to_pos(prompt[-2:])
+        except ValueError:
+            user_feedback = (
+                'A valid new cell could not be identified from your input: {0}'.format(prompt))
+            return piece, up, right, hold_move, user_feedback
+
         up, right = new_row - cur_row, new_col_no - cur_col_no
 
         debug('piece_ref: {0} | up: {1} | right: {2}'.format(piece.ref, up, right),
