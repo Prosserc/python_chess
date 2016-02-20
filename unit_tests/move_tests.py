@@ -30,18 +30,17 @@ class TestMove(unittest.TestCase):
 
 
     def test_pawn_initial_two_step_move(self):
+        self.custom_set_up('wp1', 2, 0)
+        self.assertTrue(self.move.possible)
+        self.assertEqual(self.move.new_cell_ref, "A4")
 
+
+    def test_pawn_subsequent_two_step_move(self):
         start_pos = TestMove.switch_cell_contents(["A2", "E7"], ["A4", "E5"])
         self.custom_set_up('wp1', 2, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
         self.assertEqual(self.move.invalid_reason,
                          "A pawn can only move two spaces on it's first move.")
-
-
-    def test_pawn_subsequent_two_step_move(self):
-        self.custom_set_up('wp1', 2, 0)
-        self.assertTrue(self.move.possible)
-        self.assertEqual(self.move.new_cell_ref, "A4")
 
 
     def test_pawn_taking(self):
@@ -52,6 +51,11 @@ class TestMove(unittest.TestCase):
                         msg="invalid reason: {0}".format(self.move.invalid_reason))
         self.assertEqual(self.move.new_cell_ref, "B5")
         # can't test affect on game.pieces here as this is controller from game.
+
+
+# -----------------------------------------------------------------------------------------
+# --------------------   W h o   t e s t s   t h e   t e s t s ?   ------------------------
+# -----------------------------------------------------------------------------------------
 
 
     def test_the_test_helper_func_switch_cell_contents(self):
