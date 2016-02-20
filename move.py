@@ -236,8 +236,7 @@ class Move(object):
 
             if condition == 'on_first':
                 if self.piece.move_cnt > 0:
-                    invalid_msg = ("A pawn can only move two spaces on it's " +
-                                   "first move.")
+                    invalid_msg = ("A pawn can only move two spaces on it's first move.")
                     return invalid_msg
             elif condition == 'on_take':
                 if self.new_pos not in self.occupied:
