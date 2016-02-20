@@ -30,7 +30,7 @@ class Game(object):
                  }
     move_dict['queen'] = move_dict['rook'] + move_dict['bishop']
 
-    def __init__(self, turn_limit=200, custom_start_positions=None, current_turn=0):
+    def __init__(self, turn_limit=200, custom_start_positions=None):
         """
         Initialise game object and create required member objects
         """

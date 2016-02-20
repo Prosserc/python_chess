@@ -36,7 +36,7 @@ class TestMove(unittest.TestCase):
 
 
     def test_pawn_subsequent_two_step_move(self):
-        start_pos = TestMove.switch_cell_contents(["A2", "E7"], ["A4", "E5"])
+        start_pos = TestMove.helper_switch_cells(["A2", "E7"], ["A4", "E5"])
         self.custom_set_up('wp1', 2, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
         self.assertEqual(self.move.invalid_reason,
@@ -44,7 +44,7 @@ class TestMove(unittest.TestCase):
 
 
     def test_pawn_taking(self):
-        start_pos = TestMove.switch_cell_contents(["A2", "B7"], ["A4", "B5"])
+        start_pos = TestMove.helper_switch_cells(["A2", "B7"], ["A4", "B5"])
         self.custom_set_up('wp1', 1, 1, custom_start_pos=start_pos)
         self.assertTrue(self.move.possible,
                         msg="invalid reason: {0}".format(self.move.invalid_reason))
@@ -55,7 +55,7 @@ class TestMove(unittest.TestCase):
     def test_move_not_allowed_as_it_puts_you_in_check(self):
         moves_from = ["A2", "C7", "C2", "D8"]
         moves_to = ["A4", "C5", "C4", "A5"]
-        start_pos = TestMove.switch_cell_contents(moves_from, moves_to)
+        start_pos = TestMove.helper_switch_cells(moves_from, moves_to)
         expected_invalid_msg = ('You cannot move to this space as it would leave ' +
                                'your king in check with the queen in cell A5')
 
@@ -82,12 +82,12 @@ class TestMove(unittest.TestCase):
             1: dict(A='wR1', B='wN1', C='wB1', D=False, E='wK', F='wB2', G='wN2', H='wR2')}
 
         # note this helper function allows any board moves (not restricted by game rules)
-        adjusted_positions = TestMove.switch_cell_contents(["A2", "B7", "D1"], ["A4", "B5", "H5"])
+        adjusted_positions = TestMove.helper_switch_cells(["A2", "B7", "D1"], ["A4", "B5", "H5"])
         self.assertEqual(adjusted_positions, expected_result)
 
 
     @staticmethod
-    def switch_cell_contents(old_cell_refs, new_cell_refs, positions=DEFAULT_START_POSITIONS):
+    def helper_switch_cells(old_cell_refs, new_cell_refs, positions=DEFAULT_START_POSITIONS):
         """
         Switch each cell in old_cell_refs with the corresponding cell in new_cell_refs.
         :param positions: a dict of dicts in the format of DEFAULT_START_POSITIONS
