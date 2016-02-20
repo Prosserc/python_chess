@@ -44,7 +44,6 @@ class TestMove(unittest.TestCase):
 
 
     def test_pawn_taking(self):
-
         start_pos = TestMove.switch_cell_contents(["A2", "B7"], ["A4", "B5"])
         self.custom_set_up('wp1', 1, 1, custom_start_pos=start_pos)
         self.assertTrue(self.move.possible,
@@ -53,9 +52,21 @@ class TestMove(unittest.TestCase):
         # can't test affect on game.pieces here as this is controller from game.
 
 
-# -----------------------------------------------------------------------------------------
-# --------------------   W h o   t e s t s   t h e   t e s t s ?   ------------------------
-# -----------------------------------------------------------------------------------------
+    def test_move_not_allowed_as_it_puts_you_in_check(self):
+        moves_from = ["A2", "C7", "C2", "D8"]
+        moves_to = ["A4", "C5", "C4", "A5"]
+        start_pos = TestMove.switch_cell_contents(moves_from, moves_to)
+        expected_invalid_msg = ('You cannot move to this space as it would leave ' +
+                               'your king in check with the queen in cell A5')
+
+        self.custom_set_up("wp4", 1, 0, custom_start_pos=start_pos)
+        self.assertFalse(self.move.possible)
+        self.assertEqual(self.move.invalid_reason, expected_invalid_msg)
+
+
+    # -----------------------------------------------------------------------------------------
+    # --------------------   W h o   t e s t s   t h e   t e s t s ?   ------------------------
+    # -----------------------------------------------------------------------------------------
 
 
     def test_the_test_helper_func_switch_cell_contents(self):
