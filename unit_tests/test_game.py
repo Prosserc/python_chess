@@ -6,7 +6,12 @@ class TestGame(unittest.TestCase):
 
 
     def setUp(self):
-        self.game = Game()
+        self.game = Game(default_logging=False)
+        self.maxDiff = None
+
+
+    def tearDown(self):
+        self.game = None
 
 
     def test_full_game(self):

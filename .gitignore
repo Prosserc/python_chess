@@ -3,6 +3,6 @@ __pycache__/
 *.py[cod]
 
 # ignore sub directories not intended for repo
-log.json
+*log.json
 *plans/
 .idea/

@@ -30,11 +30,12 @@ class Game(object):
                  }
     move_dict['queen'] = move_dict['rook'] + move_dict['bishop']
 
-    def __init__(self, turn_limit=200, custom_start_positions=None):
+    def __init__(self, turn_limit=200, custom_start_positions=None, default_logging=False):
         """
         Initialise game object and create required member objects
         """
         start_pos = custom_start_positions or DEFAULT_START_POSITIONS
+        self.logging = default_logging if default_logging != None else LOGGING
 
         self.board = Board(start_pos)
         self.pieces = self.__create_pieces(Game.move_dict, start_pos)
@@ -134,7 +135,7 @@ class Game(object):
         self.__process_move(piece, move, up, right, occupied, our_team, their_team)
 
         # log state of game
-        if LOGGING:
+        if self.logging:
             LOG = '\n'.join([LOG, self.__to_json()])
 
         # wrap up if done...
@@ -144,7 +145,7 @@ class Game(object):
             elif self.checkmate:
                 move.checkmate = True
                 shout('game over, ' + self.current_team + ' team wins')
-            if LOGGING:
+            if self.logging:
                 write_log(LOG)
 
 
@@ -167,7 +168,7 @@ class Game(object):
             self.get_all_possible_moves(list_moves=True)
             return piece, up, right, hold_move, user_feedback
         elif prompt.lower() == 'log':
-            if LOGGING:
+            if self.logging:
                 write_log(LOG)
                 user_feedback = "Log written to current working directory"
             else:

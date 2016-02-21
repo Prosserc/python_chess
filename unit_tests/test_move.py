@@ -10,6 +10,11 @@ class TestMove(unittest.TestCase):
 
     def setUp(self):
         self.game, self.piece, self.move = None, None, None
+        self.maxDiff = None
+
+
+    def tearDown(self):
+        self.game, self.piece, self.move = None, None, None
 
 
     def custom_set_up(self, piece_ref, up, right, custom_start_pos=None):
@@ -22,7 +27,7 @@ class TestMove(unittest.TestCase):
         :param custom_start_pos: optional: leave empty for default game start
         """
         if not self.game:
-            self.game = Game(custom_start_positions=custom_start_pos)
+            self.game = Game(custom_start_positions=custom_start_pos, default_logging=False)
         self.game.current_team = TEAMS[piece_ref[0]]
         self.piece = self.game.get_piece(piece_ref)
         occupied, our_team, their_team = self.game.get_occupied()
