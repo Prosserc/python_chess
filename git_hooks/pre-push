@@ -1,0 +1,21 @@
+#!/bin/bash
+
+SWITCH="\033["
+NORMAL="${SWITCH}0m"
+RED="${SWITCH}1;30m"
+GREEN="${SWITCH}1;32m"
+
+echo running pre-push commands
+
+echo switch dir
+ch # todo re-think how to do this...
+
+./run_tests.shl
+if [ $? -eq 0 ]; then
+    printf "${GREEN}tests all passed${NORMAL}\n"
+else
+    printf "${RED}tests failed or not run, not pushing${NORMAL}\n"
+    exit 1
+fi
+
+echo completed pre-push commands
