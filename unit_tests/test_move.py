@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import unittest
 from game import Game, TEAMS, DEFAULT_START_POSITIONS
 from move import Move

@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/python3
 """
 Unit test for chess.py - an automated game. As AI is not yet built
 these will be purely random moves with no intelligence, but will serve

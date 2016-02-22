@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Constants etc for the game"""
 from utils import format_msg
 
