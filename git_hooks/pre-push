@@ -2,7 +2,7 @@
 
 SWITCH="\033["
 NORMAL="${SWITCH}0m"
-RED="${SWITCH}1;30m"
+RED="${SWITCH}1;31m"
 GREEN="${SWITCH}1;32m"
 
 echo running pre-push commands
