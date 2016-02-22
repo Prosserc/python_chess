@@ -38,8 +38,6 @@ class TestMove(unittest.TestCase):
         self.custom_set_up('wp1', 2, 0)
         self.assertTrue(self.move.possible)
         self.assertEqual(self.move.new_cell_ref, "A4")
-        # tmp
-        self.assertTrue(False, "Intentional failure to test failed test output")
 
 
     def test_pawn_subsequent_two_step_move(self):
