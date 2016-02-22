@@ -2,11 +2,11 @@
 """
 Python implementation of chess, main entry point.
 """
-import json
-from board import Board
-from piece import Piece
-from move import Move
-from literals import PIECE_CODES, DEFAULT_START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
+#import json
+#from board import Board
+#from piece import Piece
+#from move import Move
+#from literals import PIECE_CODES, DEFAULT_START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
 # from chess_engine import pick_move
 from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, debug, DebugLevel, set_debugging_level
 
