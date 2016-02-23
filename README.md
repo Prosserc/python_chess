@@ -39,3 +39,4 @@ Left to do on basic chess engine (for one player mode):
 1. Generalise code to look ahead x moves;
 2. Improve endgame - needs to evaluate potential for checkmate (not just takes) and weight moves accordingly;
 3. Create memory (tmp objects) for the moves being considered so that state of game is correct at each point of the potential move branch being considered;!
+
