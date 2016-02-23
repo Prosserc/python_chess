@@ -29,5 +29,11 @@ class TestGame(unittest.TestCase):
         self.assertTrue(self.game.current_team, "white")
 
 
+    def test_list_moves_for_pawn_first_move(self):
+        pieces_dict = { 'wp2': self.game.get_piece('wp2')
+        #self.game.get_all_possible_moves(list_moves=true, pieces=piece_dict, team='white')
+
+
+
 if __name__ == "__main__":
     unittest.main()
