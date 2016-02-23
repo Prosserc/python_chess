@@ -4,5 +4,5 @@ printf "\nrunning unit tests...\n"
 python3 -m unittest discover -v -s ./unit_tests || python -m unittest discover -v -s ./unit_tests
 
 printf "\nrunning integration tests...\n"
-python3 -m unittest discover -v -s ./integration_tests || -m unittest discover -v -s ./integration_tests
+python3 -m unittest discover -v -s ./integration_tests || python -m unittest discover -v -s ./integration_tests
 
