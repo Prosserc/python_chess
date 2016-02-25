@@ -35,8 +35,20 @@ class TestGame(unittest.TestCase):
         possible_moves, cnt = self.game.get_all_possible_moves(pieces=piece_dict,
                                                                team='white',
                                                                list_moves=True)
-        self.assertEqual(cnt, 2)
         expected_refs = ['B3', 'B4']
+        found_refs = sorted([mv.new_cell_ref for mv in possible_moves[ref]])
+        self.assertEqual(found_refs, expected_refs)
+
+
+    def test_list_moves_for_pawn_second_move(self):
+        self.game.take_turn('white', 'a2a4')
+        self.game.take_turn('black', 'e7e5')
+        ref = 'wp1'
+        piece_dict = { ref: self.game.get_piece(ref) }
+        possible_moves, cnt = self.game.get_all_possible_moves(pieces=piece_dict,
+                                                               team='white',
+                                                               list_moves=True)
+        expected_refs = ['A5']
         found_refs = sorted([mv.new_cell_ref for mv in possible_moves[ref]])
         self.assertEqual(found_refs, expected_refs)
 
