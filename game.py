@@ -354,7 +354,7 @@ class Game(object):
 
         all_possible_moves, cnt = {}, 0
         for ref, piece in iter(sorted(pieces.items())):
-            all_possible_moves[ref] = []
+            tmp_moves = []
             for potential_move in piece.valid_moves:
                 [up, right] = potential_move[:2]
                 theoretical_move = Move(piece, up, right, occupied, our_team,
@@ -367,9 +367,12 @@ class Game(object):
                     # and new pos). 
                     # when creating a move check for matches first?
                     # Should destroy once > 1 move old to prevent build up?
-                    all_possible_moves[ref].append(theoretical_move)
+                    tmp_moves.append(theoretical_move)
                     cnt += 1
                 del theoretical_move
+
+            if len(tmp_moves) > 0:
+                all_possible_moves[ref] = tmp_moves
 
         if list_moves:
             print('\nPossible moves:')
