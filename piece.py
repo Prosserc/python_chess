@@ -33,6 +33,7 @@ class Piece(object):
             self.allowed_to_jump = False
             self.one_space_moves = self.get_one_space_moves()
 
+
     @property
     def col(self):
         return col_no_to_letter(self.col_no)

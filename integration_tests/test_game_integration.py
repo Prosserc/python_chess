@@ -7,12 +7,11 @@ class TestGame(unittest.TestCase):
 
     def setUp(self):
         self.game = Game(default_logging=False)
-        print("\nNew game hashcode: {0}".format(self.game.__hash__()))
         self.maxDiff = None
 
 
     def tearDown(self):
-        self.game = None
+        del self.game
 
 
     def test_full_game(self):
@@ -31,11 +30,15 @@ class TestGame(unittest.TestCase):
 
 
     def test_list_moves_for_pawn_first_move(self):
-        piece_dict = { 'wp2': self.game.get_piece('wp2') }
-        possible_moves, cnt = self.game.get_all_possible_moves(pieces=piece_dict, team='white')
-        #self.assertEqual(cnt, 2)
-        print(possible_moves)
-
+        ref = 'wp2'
+        piece_dict = { ref: self.game.get_piece(ref) }
+        possible_moves, cnt = self.game.get_all_possible_moves(pieces=piece_dict,
+                                                               team='white',
+                                                               list_moves=True)
+        self.assertEqual(cnt, 2)
+        expected_refs = ['B3', 'B4']
+        found_refs = sorted([mv.new_cell_ref for mv in possible_moves[ref]])
+        self.assertEqual(found_refs, expected_refs)
 
 
 if __name__ == "__main__":
