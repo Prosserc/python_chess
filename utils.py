@@ -108,10 +108,9 @@ def write_log(log):
     """
     Write json log data to a file.
     """
-    file_obj = open(LOG_FILE_PATH, 'w')
     print('\nLogging game data...')
-    file_obj.writelines(log)
-    file_obj.close()
+    with  open(LOG_FILE_PATH, 'w') as file_obj:
+        file_obj.writelines(log)
 
 
 def shout(msg, suffix=' !!!', print_output=True, return_output=False):

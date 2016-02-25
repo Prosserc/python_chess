@@ -7,6 +7,7 @@ class TestGame(unittest.TestCase):
 
     def setUp(self):
         self.game = Game(default_logging=False)
+        print("\nNew game hashcode: {0}".format(self.game.__hash__()))
         self.maxDiff = None
 
 
@@ -30,8 +31,10 @@ class TestGame(unittest.TestCase):
 
 
     def test_list_moves_for_pawn_first_move(self):
-        pieces_dict = { 'wp2': self.game.get_piece('wp2')
-        #self.game.get_all_possible_moves(list_moves=true, pieces=piece_dict, team='white')
+        piece_dict = { 'wp2': self.game.get_piece('wp2') }
+        possible_moves, cnt = self.game.get_all_possible_moves(pieces=piece_dict, team='white')
+        #self.assertEqual(cnt, 2)
+        print(possible_moves)
 
 
 

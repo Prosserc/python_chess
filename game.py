@@ -375,7 +375,7 @@ class Game(object):
                 print(self.get_piece(ref).name.ljust(6) +
                       (' (' + ref + ')').ljust(5) + ': ' +
                       ', '.join([pos_to_cell_ref(obj.new_pos) for obj in moves]))
-            _ = input("Press enter to continue")
+            #_ = input("Press enter to continue")
 
         return all_possible_moves, cnt
 
