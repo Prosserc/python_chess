@@ -23,7 +23,7 @@ class TestGame(unittest.TestCase):
     def test_list_moves_for_pawn_first_move(self):
         ref = 'wp2'
         pieces = { ref: self.game.get_piece(ref) }
-        print("Getting all possible moves ({0}) from pawns 1st move...".format(ref))
+        print("\nGetting all possible moves ({0}) from pawns 1st move...".format(ref))
         moves, _ = self.game.get_all_possible_moves(pieces=pieces, list_moves=True, team='white')
         expected_refs = ['B3', 'B4']
         found_refs = sorted([mv.new_cell_ref for mv in moves[ref]])
@@ -35,7 +35,7 @@ class TestGame(unittest.TestCase):
         self.game.take_turn('black', 'e7e5')
         ref = 'wp1'
         pieces = { ref: self.game.get_piece(ref) }
-        print("Getting all possible moves ({0}) from pawns 2nd move...".format(ref))
+        print("\nGetting all possible moves ({0}) from pawns 2nd move...".format(ref))
         moves, _ = self.game.get_all_possible_moves(pieces=pieces, list_moves=True, team='white')
 
         expected_refs = ['A5']
@@ -45,7 +45,8 @@ class TestGame(unittest.TestCase):
 
     def test_list_moves_for_check(self):
         self.helper_setup_check()
-        print("Getting all possible moves (any piece) from check...")
+        print("\nGetting all possible moves (any piece) from check...")
+        self.assertTrue(self.game.check)
         moves, _ = self.game.get_all_possible_moves(list_moves=True, team='white')
 
         expected_piece_ref = 'wp7'
@@ -58,10 +59,8 @@ class TestGame(unittest.TestCase):
 
 
 
-
-
     # ---------------------------------------------------------------------------------------
-    # -------------------------   H E L P E R   F U N CT I O N S   --------------------------
+    # -------------------------   H E L P E R   F U N C T I O N S   -------------------------
     # ---------------------------------------------------------------------------------------
 
     def helper_setup_check(self):

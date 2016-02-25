@@ -167,7 +167,12 @@ class Game(object):
             print(self.board.draw_board())
             return piece, up, right, hold_move, user_feedback
         elif prompt.lower()[:4] == 'list':
-            self.get_all_possible_moves(list_moves=True)
+            piece_ref_text = prompt[4:].strip()
+            piece = self.get_piece(piece_ref_text)
+            if piece:
+                self.get_all_possible_moves(list_moves=True, pieces={piece.ref: piece})
+            else:
+                self.get_all_possible_moves(list_moves=True)
             return piece, up, right, hold_move, user_feedback
         elif prompt.lower() == 'log':
             if self.logging:
@@ -357,19 +362,16 @@ class Game(object):
             tmp_moves = []
             for potential_move in piece.valid_moves:
                 [up, right] = potential_move[:2]
-                theoretical_move = Move(piece, up, right, occupied, our_team,
-                                        their_team, theoretical_move=True)
-                if theoretical_move.possible:
-                    # T O   R E V I E W 
-                    # keep list of move obj like this for later reuse in next 
-                    # turn? create a unique id for each move (which reflects 
-                    # the current position of every piece as well as piece_ref 
-                    # and new pos). 
-                    # when creating a move check for matches first?
-                    # Should destroy once > 1 move old to prevent build up?
-                    tmp_moves.append(theoretical_move)
-                    cnt += 1
-                del theoretical_move
+                try:
+                    theoretical_move = Move(piece, up, right, occupied, our_team,
+                                            their_team, theoretical_move=True)
+                    if theoretical_move.possible:
+                        tmp_moves.append(theoretical_move)
+                        cnt += 1
+                except KeyError:
+                    pass
+                finally:
+                    del theoretical_move
 
             if len(tmp_moves) > 0:
                 all_possible_moves[ref] = tmp_moves
@@ -380,7 +382,6 @@ class Game(object):
                 print(self.get_piece(ref).name.ljust(6) +
                       (' (' + ref + ')').ljust(5) + ': ' +
                       ', '.join([pos_to_cell_ref(obj.new_pos) for obj in moves]))
-            #_ = input("Press enter to continue")
 
         return all_possible_moves, cnt
 
@@ -389,7 +390,10 @@ class Game(object):
         """
         Takes a piece_ref e.g. 'wp1' and returns the corresponding piece object
         """
-        return self.pieces[piece_ref]
+        try:
+            return self.pieces[piece_ref]
+        except KeyError:
+            return None
 
 
 def main():
