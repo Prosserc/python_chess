@@ -246,7 +246,7 @@ class Move(object):
                     self.piece.valid_moves.remove(self.move + [condition])  # todo - check logic seems iffy
             #   T O   F O L L O W . . . (todo)
             elif condition == 'en_passant':
-                invalid_msg = "Sorry {0} rule not coded yet.".format(condition)
+                invalid_msg = "Sorry en_passant rule not coded yet."
                 return invalid_msg
         return 'okay'
 

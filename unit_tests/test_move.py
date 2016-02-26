@@ -3,6 +3,7 @@ import unittest
 from game import Game, TEAMS, DEFAULT_START_POSITIONS
 from move import Move
 from copy import deepcopy
+from literals import INVALID_MOVE_MESSAGES as invalid_move_msg
 
 
 class TestMove(unittest.TestCase):
@@ -32,6 +33,12 @@ class TestMove(unittest.TestCase):
         self.piece = self.game.get_piece(piece_ref)
         occupied, our_team, their_team = self.game.get_occupied()
         self.move = Move(self.piece, up, right, occupied, our_team, their_team)
+
+
+    def test_invalid_move_for_piece(self):
+        self.custom_set_up('wp7', 5, -2)
+        self.assertFalse(self.move.possible)
+        self.assertEqual(self.move.invalid_reason, invalid_move_msg['piece'])
 
 
     def test_pawn_initial_two_step_move(self):
