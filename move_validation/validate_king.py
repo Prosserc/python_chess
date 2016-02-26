@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from move_validation.base_move_validation_step import BaseMoveValidationStep
 from move import Move
+from literals import INVALID_MOVE_MESSAGES as invalid_msg
 
 
 class ValidateKing(BaseMoveValidationStep):
@@ -47,9 +48,8 @@ class ValidateKing(BaseMoveValidationStep):
                                     move_obj.their_team, move_obj.our_team,
                                     theoretical_move=True, stop_recursion=True)
             if theoretical_move.possible:
-                self._invalid_reason = ('You cannot move to this space as it would leave ' +
-                                        'your king in check with the ' + their_piece.name +
-                                        ' in cell ' + theoretical_move.cell_ref)
+                self._invalid_reason = invalid_msg['king'].format(their_piece.name,
+                                                                  theoretical_move.cell_ref)
                 self._is_valid = False
                 break  # cannot return here as need to revert position etc.
             del theoretical_move

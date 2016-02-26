@@ -41,6 +41,13 @@ class TestMove(unittest.TestCase):
         self.assertEqual(self.move.invalid_reason, invalid_move_msg['piece'])
 
 
+    def test_out_of_boundaries(self):
+        start_pos = TestMove.helper_switch_cells(["B1", "B8"], ["A3", "A6"])
+        self.custom_set_up('wN1', 2, -1, custom_start_pos=start_pos)
+        self.assertFalse(self.move.possible)
+        self.assertEqual(self.move.invalid_reason, invalid_move_msg['boundaries'])
+
+
     def test_pawn_initial_two_step_move(self):
         self.custom_set_up('wp1', 2, 0)
         self.assertTrue(self.move.possible)
@@ -51,8 +58,7 @@ class TestMove(unittest.TestCase):
         start_pos = TestMove.helper_switch_cells(["A2", "E7"], ["A4", "E5"])
         self.custom_set_up('wp1', 2, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason,
-                         "A pawn can only move two spaces on it's first move.")
+        self.assertEqual(self.move.invalid_reason, invalid_move_msg["cond_on_first"])
 
 
     def test_pawn_taking(self):
@@ -68,12 +74,10 @@ class TestMove(unittest.TestCase):
         moves_from = ["A2", "C7", "C2", "D8"]
         moves_to = ["A4", "C5", "C4", "A5"]
         start_pos = TestMove.helper_switch_cells(moves_from, moves_to)
-        expected_invalid_msg = ('You cannot move to this space as it would leave ' +
-                               'your king in check with the queen in cell A5')
 
         self.custom_set_up("wp4", 1, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, expected_invalid_msg)
+        self.assertEqual(self.move.invalid_reason, invalid_move_msg['king'].format('queen', 'A5'))
 
 
     # -----------------------------------------------------------------------------------------

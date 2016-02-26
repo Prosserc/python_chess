@@ -29,11 +29,12 @@ MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for
 
 INVALID_MOVE_MESSAGES = {
     "piece": 'Move is not allowed for this piece.',
-    "boundaries": "Move is not allowed as it would go outside of the board boundaries to: {0}.",
+    "boundaries": "Move is not allowed as it would go outside of the board boundaries.",
     "path_gen": "This move is blocked as {0} is occupied.",
     "path_pawn": "Pawns cannot move straight forward when obstructed by another piece.",
     "path_knight": "This move is blocked as {0} is occupied by your team.",
     "cond_on_first": "A pawn can only move two spaces on it's first move.",
     "cond_on_take": "A pawn can only move diagonally when taking.",
-    "cond_en_passant": "Sorry en_passant rule not coded yet."
+    "cond_en_passant": "Sorry en_passant rule not coded yet.",
+    "king": "Move not allowed as it would leave your king in check with the {0} in cell {1}"
 }

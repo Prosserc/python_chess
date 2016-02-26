@@ -142,8 +142,7 @@ class Move(object):
         """
         Check if move is possible within board boundaries
         """
-        invalid_msg = ('Move is not allowed as it would go outside of ' +
-                       'the board boundaries to: ' + self.new_cell_ref)
+        invalid_msg = 'Move is not allowed as it would go outside of the board boundaries.'
         if self.new_row in range(1, 9) and self.new_col_no in range(1, 9):
             return 'okay'
         return invalid_msg
@@ -290,9 +289,7 @@ class Move(object):
                                     theoretical_move=True,
                                     stop_recursion=True)
             if theoretical_move.possible:
-                invalid_msg = ('You cannot move to this space as it would leave ' +
-                               'your king in check with the ' + their_piece.name +
-                               ' in cell ' + theoretical_move.cell_ref)
+                invalid_msg = "Move not allowed as it would leave your king in check with the {0} in cell {1}".format(their_piece.name, theoretical_move.cell_ref)
                 break  # cannot return here as need to revert position etc.
             del theoretical_move
 
