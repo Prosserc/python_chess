@@ -11,11 +11,19 @@ class BaseMoveValidationStep(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self, move_obj):
+        """
+        :param move_obj: The move object to be validated
+        :return: None
+        """
         raise NotImplementedError("This is an abstract base class")
 
 
     @abstractmethod
     def perform_check(self):
+        """
+        Performs the check and sets up is_valid and invalid_reason properties
+        :return: None
+        """
         raise NotImplementedError("This is an abstract base class")
 
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""
-Validation step to ensure that the move requests is valid for the relevant piece
-"""
 from move_validation.base_move_validation_step import BaseMoveValidationStep, debug, DebugLevel
 from move import Move
 
 
-class MoveValidForPiece(BaseMoveValidationStep):
+class ValidatePiece(BaseMoveValidationStep):
+"""
+Validation step to ensure that the move requests is valid for the relevant piece
+"""
 
 
     def __init__(self, move_obj):
