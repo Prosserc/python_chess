@@ -62,6 +62,7 @@ class ValidatePath(BaseMoveValidationStep):
         else:
             if move_obj.new_pos in move_obj.our_team_cells:
                 self._invalid_reason = invalid_msg['path_knight'].format(move_obj.new_cell_ref)
+                return
             elif move_obj.new_pos in move_obj.their_team_cells:
                 move_obj.take = True
 

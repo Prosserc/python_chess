@@ -30,11 +30,11 @@ class ValidateConditions(BaseMoveValidationStep):
                     return
             elif condition == 'on_take':
                 if self.move_obj.new_pos not in self.move_obj.occupied:
-                    self._invalid_reason = invalid_msg['cond_one_take']
+                    self._invalid_reason = invalid_msg['cond_on_take']
                     return
                 else:
                     # todo - check logic seems iffy
-                    self.move_obj.piece.valid_moves.remove(self.move_obj + [condition])
+                    self.move_obj.piece.valid_moves.remove(self.move_obj.move + [condition])
             #   T O   F O L L O W . . . (todo)
             elif condition == 'en_passant':
                 self._invalid_reason = invalid_msg['cond_en_passant']
