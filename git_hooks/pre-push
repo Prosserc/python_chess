@@ -12,9 +12,9 @@ ch # todo re-think how to do this...
 
 ./run_tests.shl
 if [ $? -eq 0 ]; then
-    printf "${GREEN}tests all passed${NORMAL}\n"
+    printf "${GREEN}A L L   T E S T S   P A S S E D${NORMAL}\n"
 else
-    printf "${RED}tests failed or not run, not pushing${NORMAL}\n"
+    printf "${RED}T E S T S   F A I L E D   ( o r   n o t   r u n ) ,   N O T   P U S H I N G${NORMAL}\n"
     exit 1
 fi
 
