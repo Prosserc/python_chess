@@ -189,7 +189,7 @@ class Move(object):
                     # if it's not the final position or they are in our team block
                     if (not final_step) or (tmp_pos in self.our_team_cells):
                         invalid_msg = 'This move is blocked as {0} is occupied.'.format(
-                            self.cell_ref)
+                            pos_to_cell_ref(tmp_pos))
                         return invalid_msg
                     # also block if it is pawn going straight forward
                     elif (self.piece.name == 'pawn') and (self.right == 0):

@@ -51,7 +51,7 @@ class TestGame(unittest.TestCase):
 
         expected_piece_ref = 'wp7'
         found_piece_refs = sorted(list(moves.keys()))
-        self.assertEqual([expected_piece_ref], found_piece_refs)
+        self.assertEqual(found_piece_refs, [expected_piece_ref])
 
         expected_cell_refs = ['G3']
         found_cell_refs = sorted([mv.new_cell_ref for mv in moves[expected_piece_ref]])

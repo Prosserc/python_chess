@@ -7,7 +7,7 @@ from board import Board
 from piece import Piece
 from move import Move
 from literals import PIECE_CODES, DEFAULT_START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
-#from chess_engine import pick_move
+# from chess_engine import pick_move
 from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, debug, DebugLevel, set_debugging_level
 from copy import deepcopy
 
@@ -37,7 +37,7 @@ class Game(object):
         """
         start_pos = custom_start_positions or deepcopy(DEFAULT_START_POSITIONS)
         # need a copy here otherwise DEFAULT_START_POSITIONS gets changes and reused in next game
-        self.logging = default_logging if default_logging != None else LOGGING
+        self.logging = default_logging if default_logging else LOGGING
 
         self.board = Board(start_pos)
         self.pieces = self.__create_pieces(Game.move_dict, start_pos)
@@ -265,7 +265,7 @@ class Game(object):
             taken_piece = self.get_piece(taken_piece_ref)
             taken_piece.taken = True
             assert self.get_piece(taken_piece.ref).taken  # todo -replace with unit test
-            debug('taken piece: ' + taken_piece.ref, DebugLevel.low, print_func=shout)
+            shout('taken piece: {0}'.format(taken_piece.ref))
 
         # update board
         self.board.update_board(move.pos, move.new_pos, piece.ref)

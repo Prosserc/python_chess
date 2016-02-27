@@ -14,10 +14,6 @@ class TestMove(unittest.TestCase):
         self.maxDiff = None
 
 
-    def tearDown(self):
-        self.game, self.piece, self.move = None, None, None
-
-
     def custom_set_up(self, piece_ref, up, right, custom_start_pos=None):
         """
         Creates a move object for the specified piece and sets self.move
@@ -48,26 +44,58 @@ class TestMove(unittest.TestCase):
         self.assertEqual(self.move.invalid_reason, invalid_move_msg['boundaries'])
 
 
-    def test_pawn_initial_two_step_move(self):
+    def test_path_blocked_general(self):
+        self.custom_set_up('wB1', 1, 1)
+        self.assertFalse(self.move.possible)
+        self.assertEqual(self.move.invalid_reason, invalid_move_msg['path_gen'].format('D2'))
+
+
+    def test_path_blocked_for_pawn_forward_move(self):
+        start_pos = TestMove.helper_switch_cells(["A2", "A7"], ["A4", "A5"])
+        self.custom_set_up('wp1', 1, 0, custom_start_pos=start_pos)
+        self.assertFalse(self.move.possible)
+        self.assertEqual(self.move.invalid_reason, invalid_move_msg['path_pawn'])
+
+
+    def test_destination_blocked_for_knight_with_own_team(self):
+        start_pos = TestMove.helper_switch_cells(["A2", "C2"], ["A3", "C3"])
+        self.custom_set_up('wN1', 2, 1, custom_start_pos=start_pos)
+        self.assertFalse(self.move.possible)
+        self.assertEqual(self.move.invalid_reason, invalid_move_msg['path_knight'].format('C3'))
+
+
+    def test_path_not_blocked_for_knight_jumping(self):
+        self.custom_set_up('wN1', 2, 1)
+        self.assertTrue(self.move.possible, msg="invalid reason: {0}".format(self.move.invalid_reason))
+        self.assertEqual(self.move.new_cell_ref, "C3")
+
+
+    def test_on_first_condition_allowed_with_pawn_1st_move(self):
         self.custom_set_up('wp1', 2, 0)
-        self.assertTrue(self.move.possible)
+        self.assertTrue(self.move.possible, msg="invalid reason: {0}".format(self.move.invalid_reason))
         self.assertEqual(self.move.new_cell_ref, "A4")
 
 
-    def test_pawn_subsequent_two_step_move(self):
+    def test_on_first_condition_not_allowed_with_pawn_subsequent_move(self):
         start_pos = TestMove.helper_switch_cells(["A2", "E7"], ["A4", "E5"])
         self.custom_set_up('wp1', 2, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
         self.assertEqual(self.move.invalid_reason, invalid_move_msg["cond_on_first"])
 
 
-    def test_pawn_taking(self):
+    def test_on_take_allowed_with_pawn_taking(self):
         start_pos = TestMove.helper_switch_cells(["A2", "B7"], ["A4", "B5"])
         self.custom_set_up('wp1', 1, 1, custom_start_pos=start_pos)
-        self.assertTrue(self.move.possible,
-                        msg="invalid reason: {0}".format(self.move.invalid_reason))
+        self.assertTrue(self.move.possible, msg="invalid reason: {0}".format(self.move.invalid_reason))
         self.assertEqual(self.move.new_cell_ref, "B5")
         # can't test affect on game.pieces here as this is controller from game.
+
+
+    def test_on_take_not_allowed_with_pawn(self):
+        self.custom_set_up('wp1', 1, 1)
+        self.assertFalse(self.move.possible)
+        self.assertIn(self.move.invalid_reason,
+                      [invalid_move_msg["cond_on_take"], invalid_move_msg["cond_en_passant"]])
 
 
     def test_move_not_allowed_as_it_puts_you_in_check(self):
@@ -87,7 +115,9 @@ class TestMove(unittest.TestCase):
 
     def test_the_test_helper_func_switch_cell_contents(self):
 
-        expected_result = {
+        # note this helper function allows any board moves (not restricted by game rules)
+        adj_pos1 = TestMove.helper_switch_cells(["A2", "B7", "D1"], ["A4", "B5", "H5"])
+        exp_result1 = {
             8: dict(A='bR1', B='bN1', C='bB1', D='bQ', E='bK', F='bB2', G='bN2', H='bR2'),
             7: dict(A='bp1', B=False, C='bp3', D='bp4', E='bp5', F='bp6', G='bp7', H='bp8'),
             6: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
@@ -95,11 +125,22 @@ class TestMove(unittest.TestCase):
             4: dict(A='wp1', B=False, C=False, D=False, E=False, F=False, G=False, H=False),
             3: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
             2: dict(A=False, B='wp2', C='wp3', D='wp4', E='wp5', F='wp6', G='wp7', H='wp8'),
-            1: dict(A='wR1', B='wN1', C='wB1', D=False, E='wK', F='wB2', G='wN2', H='wR2')}
+            1: dict(A='wR1', B='wN1', C='wB1', D=False, E='wK', F='wB2', G='wN2', H='wR2')
+        }
+        self.assertEqual(adj_pos1, exp_result1)
 
-        # note this helper function allows any board moves (not restricted by game rules)
-        adjusted_positions = TestMove.helper_switch_cells(["A2", "B7", "D1"], ["A4", "B5", "H5"])
-        self.assertEqual(adjusted_positions, expected_result)
+        adj_pos2 = TestMove.helper_switch_cells(["A2", "C2"], ["A3", "C3"])
+        exp_result2 = {
+            8: dict(A='bR1', B='bN1', C='bB1', D='bQ', E='bK', F='bB2', G='bN2', H='bR2'),
+            7: dict(A='bp1', B='bp2', C='bp3', D='bp4', E='bp5', F='bp6', G='bp7', H='bp8'),
+            6: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            5: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            4: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            3: dict(A='wp1', B=False, C='wp3', D=False, E=False, F=False, G=False, H=False),
+            2: dict(A=False, B='wp2', C=False, D='wp4', E='wp5', F='wp6', G='wp7', H='wp8'),
+            1: dict(A='wR1', B='wN1', C='wB1', D='wQ', E='wK', F='wB2', G='wN2', H='wR2')
+        }
+        self.assertEqual(adj_pos2, exp_result2)
 
 
     @staticmethod

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from move_validation.base_move_validation_step import BaseMoveValidationStep
 from literals import INVALID_MOVE_MESSAGES as invalid_msg
+from utils import pos_to_cell_ref
 
 
 class ValidatePath(BaseMoveValidationStep):
@@ -43,7 +44,7 @@ class ValidatePath(BaseMoveValidationStep):
                     # if it's not the final position or they are in our team block
                     if (not final_step) or (tmp_pos in move_obj.our_team_cells):
                         self._invalid_reason = invalid_msg['path_gen'].format(
-                            move_obj.cell_ref)
+                            pos_to_cell_ref(tmp_pos))
                         return
                     # also block if it is pawn going straight forward
                     elif (move_obj.piece.name == 'pawn') and (move_obj.right == 0):
