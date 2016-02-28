@@ -143,11 +143,11 @@ class Game(object):
 
         # wrap up if done...
         if self.checkmate or self.turns >= 200:
-            if self.turns >= self.turn_limit:  # TODO - replace with self.draw once draw rules done
-                shout(str(self.turns) + ' moves, lets call it a draw')
+            if self.turns >= self.turn_limit:
+                shout('{0} moves, lets call it a draw'.format(self.turns))
             elif self.checkmate:
                 move.checkmate = True
-                shout('game over, ' + self.current_team + ' team wins')
+                shout('game over, {0} team wins'.format(self.current_team))
             if self.logging:
                 write_log(LOG)
 
@@ -281,7 +281,7 @@ class Game(object):
             move.check = True
             other_team = ('black' if self.current_team == 'white' else 'white')
             shout(other_team + ' team in check')
-            print('looking for checkmate....\n')
+            debug('looking for checkmate....\n')
 
             # other player in checkmate?
             self.checkmate = self.__in_checkmate(occupied, our_team, their_team)
@@ -385,9 +385,10 @@ class Game(object):
         if list_moves:
             print('\nPossible moves:')
             for ref, moves in iter(sorted(all_possible_moves.items())):
-                print(self.get_piece(ref).name.ljust(6) +
-                      (' (' + ref + ')').ljust(5) + ': ' +
-                      ', '.join([pos_to_cell_ref(obj.new_pos) for obj in moves]))
+                piece = self.get_piece(ref)
+                piece_text = "{0} in {1} to".format(piece.name, piece.cell_ref).rjust(17)
+                possible_destinations = sorted([pos_to_cell_ref(obj.new_pos) for obj in moves])
+                print("{0}:  {1}".format(piece_text, ', '.join(possible_destinations)))
 
         return all_possible_moves, cnt
 
