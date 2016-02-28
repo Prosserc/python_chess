@@ -108,6 +108,28 @@ class TestMove(unittest.TestCase):
         self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['king'].format('queen', 'A5'))
 
 
+    def test_en_passant_move_allowed(self):
+        moves_from = ["A2", "D7", "A4", "B7"]
+        moves_to = ["A4", "D5", "A5", "B5"]
+        start_pos = TestMove.helper_switch_cells(moves_from, moves_to)
+
+        # need to do own setup as we need to adj the game before the move
+        self.game = Game(custom_start_positions=start_pos, default_logging=False)
+        self.game.current_team = 'white'
+        self.piece = self.game.get_piece('wp1')
+        occupied, our_team, their_team = self.game.get_occupied()
+
+        # the game normally takes care of this for us, doing manually due to custom start pos
+        last_piece_ref = 'bp2'
+        self.game.last_piece_to_move = last_piece_ref
+        last_piece = self.game.get_piece(last_piece_ref)
+        last_piece.last_to_move = True
+
+        self.move = Move(self.piece, 1, 1, occupied, our_team, their_team)
+
+        self.assertTrue(self.move.possible, msg=self.move.invalid_reason)
+
+
     # -----------------------------------------------------------------------------------------
     # --------------------   W h o   t e s t s   t h e   t e s t s ?   ------------------------
     # -----------------------------------------------------------------------------------------

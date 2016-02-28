@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from move_validation.base_move_validation_step import BaseMoveValidationStep, utils
-from literals import INVALID_MOVE_MESSAGES as invalid_msg
+from literals import INVALID_MOVE_MESSAGES as invalid_msg, DEFAULT_START_POSITIONS
 
 
 class ValidateConditions(BaseMoveValidationStep):
@@ -53,20 +53,38 @@ class ValidateConditions(BaseMoveValidationStep):
 
     @property
     def _en_passant_applies(self):
-        #   T O   F O L L O W . . . (todo)
 
-        # your piece is a pawn...
+        #set up
+        target_pos = self.move_obj.piece.get_offset_pos(0, self.move_obj.right)
+        target_piece = None
+        for ref, piece in self.move_obj.their_team.items():
+            if piece.pos == target_pos and piece.name == "pawn":
+                target_piece = piece
 
-        # and an opposition pawn is directly to your right or left...
+        # an opponent pawn is directly to your side (in the direction you are trying to move)...
+        if not target_piece:
+            self.debug('En Passant condition - no pawn in required position')
+            return False
 
-        # and was the last to move
+        # and was the last to move...
+        if not target_piece.last_to_move:
+            self.debug('En Passant condition - the opposition pawn was not the not last to move')
+            return False
 
-        # and is two squares up/down from where they started
+        # and it was on their first move...
+        if target_piece.move_cnt > 1:
+            self.debug('En Passant condition - the opposition pawn had taken more than one move')
+            return False
 
-        # and was on their first move
+        # and is two squares up/down from where they started...
+        row_before_last_move = target_piece.row - (2 * target_piece.forward)
+        original_contents_of_cell = DEFAULT_START_POSITIONS[row_before_last_move][target_piece.col]
+        if original_contents_of_cell != target_piece.ref:
+            self.debug('En Passant condition - the opposition pawn moved two spaces forward')
+            return False
 
+        return True
 
-        return False
 
 
     @staticmethod

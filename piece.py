@@ -47,6 +47,10 @@ class Piece(object):
     def cell_ref(self):
         return pos_to_cell_ref(self.pos)
 
+    @property
+    def forward(self):
+        return 1 if self.team.lower() == 'white' else -1
+
 
     def __to_json(self):
         """
@@ -62,15 +66,9 @@ class Piece(object):
         """
         # valid moves for each type of piece:
         # [[-]down, [-]right, <condition1>, ..., <conditionN>]
-        valid_moves = []
 
-        if self.team.lower() == 'black':
-            for move in piece_moves:
-                valid_moves.append([move[0] * -1] + move[1:])  # invert up/down moves
-        else:
-            valid_moves = piece_moves
-            
-        return valid_moves
+        # self.forward used to invert direction for black...
+        return [[move[0] * self.forward] + move[1:] for move in piece_moves]
 
 
     def get_one_space_moves(self):
@@ -84,6 +82,10 @@ class Piece(object):
                 one_space_moves.append(move)
 
         return one_space_moves
+
+
+    def get_offset_pos(self, up, right):
+        return [self.row + up, self.col_no + right]
 
 
 if __name__ == '__main__':

@@ -27,6 +27,12 @@ MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for
         "your prompt entry are used to identify the current cell and the last two for the new "
         "cell e.g. to move from A2 to A4 you could enter 'A2, A4' or use shorthand of 'a2a4'.")
 
+ep_conditions = [
+    "A pawn can only move en_passant if all of the following conditions apply:",
+    "  - an opposition pawn to your side (in the direction you are trying to move)",
+    "  - this pawn has just taken it's first move (on the games last turn)",
+    "  - this pawn's first move was two spaces forward"]
+
 INVALID_MOVE_MESSAGES = {
     "piece": 'Move is not allowed for this piece.',
     "boundaries": "Move is not allowed as it would go outside of the board boundaries.",
@@ -34,7 +40,7 @@ INVALID_MOVE_MESSAGES = {
     "path_pawn": "Pawns cannot move straight forward when obstructed by another piece.",
     "path_knight": "This move is blocked as {0} is occupied by your team.",
     "cond_on_first": "A pawn can only move two spaces on it's first move.",
-    "cond_on_take": "A pawn can only move diagonally when taking.",
-    "cond_en_passant": "Sorry en_passant rule not coded yet.",
+    "cond_on_take": "A pawn can only take when an opposition piece is diagonally in-front.",
+    "cond_en_passant": "\n".join(ep_conditions),
     "king": "Move not allowed as it would leave your king in check with the {0} in cell {1}"
 }
