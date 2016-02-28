@@ -25,6 +25,7 @@ class Piece(object):
         self.valid_moves = self.get_valid_moves(piece_moves)
         self.move_cnt = move_cnt
         self.taken = False
+        self.last_to_move = False
 
         # note knights ability to jump
         if self.name.lower() == 'knight':

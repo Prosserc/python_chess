@@ -48,6 +48,7 @@ class Game(object):
         self.draw = False
         self.turns = 0
         self.current_team = None
+        self.last_piece_to_move = None
         self.turn_limit = turn_limit
 
 
@@ -284,6 +285,11 @@ class Game(object):
 
             # other player in checkmate?
             self.checkmate = self.__in_checkmate(occupied, our_team, their_team)
+
+        last_piece = self.get_piece(self.last_piece_to_move)
+        if last_piece:
+            last_piece.last_to_move = False
+        move.piece.last_to_move = True
 
 
     def __in_check(self, piece, occupied, our_team, their_team):

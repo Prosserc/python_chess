@@ -54,6 +54,18 @@ class ValidateConditions(BaseMoveValidationStep):
     @property
     def _en_passant_applies(self):
         #   T O   F O L L O W . . . (todo)
+
+        # your piece is a pawn...
+
+        # and an opposition pawn is directly to your right or left...
+
+        # and was the last to move
+
+        # and is two squares up/down from where they started
+
+        # and was on their first move
+
+
         return False
 
 

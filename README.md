@@ -27,7 +27,7 @@ Left to do on basic two player ASCII mode:
 
 1. Swaps (pawn promotion);
 2. Castling;
-3. En Passant restrictions around only one opportuinity to take???
+3. En Passant restrictions around only one opportunity to take???
 4. Draw Rules:
    1. King not in check, has not move and cannot?
    2. After 50 moves without a pawn being moved or peice being taken (50 move rule);
