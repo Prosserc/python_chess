@@ -2,7 +2,7 @@
 """
 Called from python_chess.game
 """
-from utils import (pos_to_cell_ref, col_no_to_letter, shout, debug, WRONG_ENTRY_POINT_MSG)
+from utils import (pos_to_cell_ref, col_no_to_letter, shout, debug, DebugLevel, WRONG_ENTRY_POINT_MSG)
 
 
 class Move(object):
@@ -125,8 +125,8 @@ class Move(object):
 
         for validation_step in validation_steps:
             validation_step.perform_check()
-            debug("{0} - {1}".format(validation_step.__doc__, validation_step.is_valid),
-                  filter_func=lambda: not self.theoretical_move)
+            debug("{0} - is valid: {1}".format(validation_step.__doc__, validation_step.is_valid),
+                  level = DebugLevel.low, filter_func=lambda: not self.theoretical_move)
             if not validation_step.is_valid:
                 # stop at first invalid reason for performance (most expensive checks last)
                 return validation_step.is_valid, validation_step.invalid_reason

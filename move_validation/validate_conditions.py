@@ -5,39 +5,58 @@ from literals import INVALID_MOVE_MESSAGES as invalid_msg
 
 class ValidateConditions(BaseMoveValidationStep):
     """
-    Check if all conditions stored for the move are satisfied.
-    The conditions are identified when the piece is created e.g. a
-    pawn only being able to move diagonally if taking.
+    Check if all conditions stored for the move are satisfied e.g. a pawn is only
+    able to move diagonally if taking.
     """
 
 
     def perform_check(self):
-        ind = [i[:2] for i in self.move_obj.piece.valid_moves].index(self.move_obj.move)
-        try:
-            conditions = self.move_obj.piece.valid_moves[ind][2:]
-        except IndexError:
-            self._is_valid = True
-            return  # no conditions on move
+        potential_moves = [mv for mv in self.move_obj.piece.valid_moves if mv[:2] == self.move_obj.move[:2]]
 
-        # todo - should only need to find one valid move to cont
-        for condition in conditions:
-            self.debug('Checking condition: {0}'.format(condition),
-                       debug_level=utils.DebugLevel.low)
+        # attempt to find on valid move where there is condition or the condition is satisfied
+        for move in potential_moves:
 
-            if condition == 'on_first':
-                if self.move_obj.piece.move_cnt > 0:
-                    self._invalid_reason = invalid_msg['cond_on_first']
-                    return
-            elif condition == 'on_take':
-                if self.move_obj.new_pos not in self.move_obj.occupied:
-                    self._invalid_reason = invalid_msg['cond_on_take']
+            if self._move_has_a_condition(move):
+                condition = move[2]
+                self.debug('Checking condition: {0}'.format(condition), debug_level=utils.DebugLevel.low)
+
+                if self._condition_is_valid(condition):
+                    self._is_valid = True
                     return
                 else:
-                    # todo - check logic seems iffy
-                    self.move_obj.piece.valid_moves.remove(self.move_obj.move + [condition])
-            #   T O   F O L L O W . . . (todo)
-            elif condition == 'en_passant':
-                self._invalid_reason = invalid_msg['cond_en_passant']
+                    self._invalid_reason = invalid_msg["cond_{0}".format(condition)]
+                    self._is_valid = False
+
+            else:
+                self._is_valid = True
                 return
 
-        self._is_valid = True
+
+    def _condition_is_valid(self, condition):
+        condition_outcomes = {
+            'on_first': self._on_first_applies,
+            'on_take': self._on_take_applies,
+            'en_passant': self._en_passant_applies
+        }
+        return condition_outcomes[condition]
+
+
+    @property
+    def _on_first_applies(self):
+        return self.move_obj.piece.move_cnt == 0
+
+
+    @property
+    def _on_take_applies(self):
+        return self.move_obj.new_pos in [pos for pos in self.move_obj.occupied]
+
+
+    @property
+    def _en_passant_applies(self):
+        #   T O   F O L L O W . . . (todo)
+        return False
+
+
+    @staticmethod
+    def _move_has_a_condition(move):
+        return len(move) > 2

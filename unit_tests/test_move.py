@@ -3,7 +3,7 @@ import unittest
 from game import Game, TEAMS, DEFAULT_START_POSITIONS
 from move import Move
 from copy import deepcopy
-from literals import INVALID_MOVE_MESSAGES as invalid_move_msg
+from literals import INVALID_MOVE_MESSAGES
 
 
 class TestMove(unittest.TestCase):
@@ -34,34 +34,34 @@ class TestMove(unittest.TestCase):
     def test_invalid_move_for_piece(self):
         self.custom_set_up('wp7', 5, -2)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, invalid_move_msg['piece'])
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['piece'])
 
 
     def test_out_of_boundaries(self):
         start_pos = TestMove.helper_switch_cells(["B1", "B8"], ["A3", "A6"])
         self.custom_set_up('wN1', 2, -1, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, invalid_move_msg['boundaries'])
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['boundaries'])
 
 
     def test_path_blocked_general(self):
         self.custom_set_up('wB1', 1, 1)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, invalid_move_msg['path_gen'].format('D2'))
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['path_gen'].format('D2'))
 
 
     def test_path_blocked_for_pawn_forward_move(self):
         start_pos = TestMove.helper_switch_cells(["A2", "A7"], ["A4", "A5"])
         self.custom_set_up('wp1', 1, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, invalid_move_msg['path_pawn'])
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['path_pawn'])
 
 
     def test_destination_blocked_for_knight_with_own_team(self):
         start_pos = TestMove.helper_switch_cells(["A2", "C2"], ["A3", "C3"])
         self.custom_set_up('wN1', 2, 1, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, invalid_move_msg['path_knight'].format('C3'))
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['path_knight'].format('C3'))
 
 
     def test_path_not_blocked_for_knight_jumping(self):
@@ -80,7 +80,7 @@ class TestMove(unittest.TestCase):
         start_pos = TestMove.helper_switch_cells(["A2", "E7"], ["A4", "E5"])
         self.custom_set_up('wp1', 2, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, invalid_move_msg["cond_on_first"])
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES["cond_on_first"])
 
 
     def test_on_take_allowed_with_pawn_taking(self):
@@ -95,7 +95,7 @@ class TestMove(unittest.TestCase):
         self.custom_set_up('wp1', 1, 1)
         self.assertFalse(self.move.possible)
         self.assertIn(self.move.invalid_reason,
-                      [invalid_move_msg["cond_on_take"], invalid_move_msg["cond_en_passant"]])
+                      [INVALID_MOVE_MESSAGES["cond_on_take"], INVALID_MOVE_MESSAGES["cond_en_passant"]])
 
 
     def test_move_not_allowed_as_it_puts_you_in_check(self):
@@ -105,7 +105,7 @@ class TestMove(unittest.TestCase):
 
         self.custom_set_up("wp4", 1, 0, custom_start_pos=start_pos)
         self.assertFalse(self.move.possible)
-        self.assertEqual(self.move.invalid_reason, invalid_move_msg['king'].format('queen', 'A5'))
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['king'].format('queen', 'A5'))
 
 
     # -----------------------------------------------------------------------------------------

@@ -21,7 +21,7 @@ class BaseMoveValidationStep(metaclass=ABCMeta):
             raise TypeError("A move object is required to initialise this class")
 
         self._is_valid = False
-        self._invalid_reason = "Validation not yet performed"
+        self._invalid_reason = "{0} - Validation not yet performed".format(self.__doc__)
 
 
     @abstractmethod
