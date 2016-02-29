@@ -157,7 +157,7 @@ def play(turns=200):
     game, team = Game(), 'None'
 
     level_function = {0: random_move, 1: level1_move, 2: level2_move, 3: level3_move}
-    team_levels = {'white': 1, 'black': 0}
+    team_levels = {'white': 2, 'black': 0}
 
     while not game.checkmate and game.turns < turns:
         # try:

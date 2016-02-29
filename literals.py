@@ -20,7 +20,7 @@ DEFAULT_START_POSITIONS = {
     1: dict(A='wR1', B='wN1', C='wB1', D='wQ', E='wK', F='wB2', G='wN2', H='wR2')
 }
 
-LOGGING = True
+LOGGING = False
 
 MOVE_INSTRUCTIONS = format_msg("\nTo specify a move enter the cell reference for the piece you "
         "want to move and the cell reference for the new location. The first two characters of "

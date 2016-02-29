@@ -11,14 +11,16 @@ class ValidateConditions(BaseMoveValidationStep):
 
 
     def perform_check(self):
-        potential_moves = [mv for mv in self.move_obj.piece.valid_moves if mv[:2] == self.move_obj.move[:2]]
+        potential_moves = [mv for mv in self.move_obj.piece.valid_moves
+                           if mv[:2] == self.move_obj.move[:2]]
 
         # attempt to find on valid move where there is condition or the condition is satisfied
         for move in potential_moves:
 
             if self._move_has_a_condition(move):
                 condition = move[2]
-                self.debug('Checking condition: {0}'.format(condition), debug_level=utils.DebugLevel.low)
+                self.debug('Checking condition: {0}'.format(condition),
+                           debug_level=utils.DebugLevel.low)
 
                 if self._condition_is_valid(condition):
                     self._is_valid = True
