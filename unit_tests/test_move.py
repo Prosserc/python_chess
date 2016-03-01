@@ -109,21 +109,22 @@ class TestMove(unittest.TestCase):
             'queen', 'A5'))
 
 
-    # def test_moving_king_not_allowed_as_it_would_put_itself_in_check(self):
-    #     start_pos = {
-    #         8: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-    #         7: dict(A=False, B=False, C=False, D=False, E='bK', F=False, G=False, H=False),
-    #         6: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-    #         5: dict(A=False, B='bp2', C=False, D='wp4', E=False, F=False, G=False, H=False),
-    #         4: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-    #         3: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-    #         2: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
-    #         1: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H='wK')
-    #     }
-    #     self.custom_set_up("bK", 1, 0, custom_start_pos=start_pos)
-    #     self.assertFalse(self.move.possible)
-    #     self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['king'].format(
-    #         'pawn', 'D5'))
+    def test_moving_king_not_allowed_as_it_would_put_itself_in_check(self):
+        start_pos = {
+            8: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            7: dict(A=False, B=False, C=False, D=False, E='bK', F=False, G=False, H=False),
+            6: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            5: dict(A=False, B='bp2', C=False, D='wp4', E=False, F=False, G=False, H=False),
+            4: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            3: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            2: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H=False),
+            1: dict(A=False, B=False, C=False, D=False, E=False, F=False, G=False, H='wK')
+        }
+        self.custom_set_up("bK", -1, 0, custom_start_pos=start_pos)
+        self.assertFalse(self.move.possible)
+        self.assertEqual(self.move.new_cell_ref, "E6")
+        self.assertEqual(self.move.invalid_reason, INVALID_MOVE_MESSAGES['king'].format(
+            'pawn', 'D5'))
 
 
     def test_en_passant_move_allowed(self):
