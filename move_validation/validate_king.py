@@ -2,6 +2,7 @@
 from move_validation.base_move_validation_step import BaseMoveValidationStep
 from move import Move
 from literals import INVALID_MOVE_MESSAGES as invalid_msg
+from copy import deepcopy
 
 
 class ValidateKing(BaseMoveValidationStep):
