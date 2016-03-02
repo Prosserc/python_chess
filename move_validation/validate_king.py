@@ -12,55 +12,61 @@ class ValidateKing(BaseMoveValidationStep):
 
 
     def perform_check(self):
-        move_obj = self.move_obj
         self._is_valid = True
+        self._team = self.move_obj.piece.team
+
+        # need to temporarily update move to see if it puts king in danger. Updating a tmp copy
+        tmp_move_obj = deepcopy(self.move_obj)
 
         # define base case as the move object is created recursively below
-        if move_obj.stop_recursion:
+        if tmp_move_obj.stop_recursion:
             return
 
-        # need to temporarily update piece object, so that all of the theoretical
-        # moves checked below will recognise the new position (i.e. as if you had
-        # made the move).
-        # TODO - review, consider making a tmp copy of their team to work with instead
-        move_obj.piece.row = move_obj.new_row
-        move_obj.piece.col_no = move_obj.new_col_no
-        if move_obj.take:
-            take_ref = [ref for ref in move_obj.their_team.keys()
-                        if move_obj.their_team[ref].pos == move_obj.new_pos][0]
-            taken_piece = move_obj.their_team[take_ref]
-            if taken_piece.name != 'king':
-                del move_obj.their_team[take_ref]
-        move_obj.occupied[move_obj.occupied.index([move_obj.row, move_obj.col_no])] = (
-            [move_obj.new_row, move_obj.new_col_no])
+        # reflect move in position
+        tmp_move_obj.piece.row = self.move_obj.new_row
+        tmp_move_obj.piece.col_no = self.move_obj.new_col_no
 
-        if move_obj.piece.team == 'white':
-            our_king, their_king = move_obj.our_team['wK'], move_obj.their_team['bK']
-        else:
-            our_king, their_king = move_obj.our_team['bK'], move_obj.their_team['wK']
+        # update occupied to reflect new position
+        occ_index = tmp_move_obj.occupied.index(tmp_move_obj.pos)
+        tmp_move_obj.occupied[occ_index] = (tmp_move_obj.new_pos)
+
+        # if taking anything adjust their_team and occupied accordingly
+        if tmp_move_obj.take:
+            taken_piece = [piece for ref, piece in tmp_move_obj.their_team.items()
+                           if piece.pos == tmp_move_obj.new_pos][0]
+            if taken_piece.name != 'king':
+                del tmp_move_obj.their_team[taken_piece.ref]
+                tmp_move_obj.occupied.remove(taken_piece.pos)
+
 
         # iterate through dictionary of their pieces creating theoretical moves
         # attempting to take king, if possible then move would put you in check.
-        for ref, their_piece in move_obj.their_team.items():
-            up = our_king.row - their_piece.row
-            right = our_king.col_no - their_piece.col_no
-            # reverse our_team and their team args to switch
-            theoretical_move = Move(their_piece, up, right, move_obj.occupied,
-                                    move_obj.their_team, move_obj.our_team,
-                                    theoretical_move=True, stop_recursion=True)
-            if theoretical_move.possible:
-                self._invalid_reason = invalid_msg['king'].format(their_piece.name,
-                                                                  theoretical_move.cell_ref)
-                self._is_valid = False
-                break  # cannot return here as need to revert position etc.
-            del theoretical_move
+        for ref, their_piece in tmp_move_obj.their_team.items():
+            self._create_theoretical_move(ref, their_piece, tmp_move_obj)
 
-        # revert piece to original position
-        move_obj.piece.row, move_obj.piece.col_no = move_obj.row, move_obj.col_no  # revert to original pos
-        move_obj.occupied[move_obj.occupied.index(move_obj.new_pos)] = [move_obj.row, move_obj.col_no]
-        if move_obj.take:
-            move_obj.occupied.append(move_obj.new_pos)  # re-instate taken piece
-            # noinspection PyUnboundLocalVariable
-            if taken_piece.name != 'king':
-                # noinspection PyUnboundLocalVariable
-                move_obj.their_team[take_ref] = taken_piece
+
+    def _create_theoretical_move(self, ref, their_piece, tmp_move_obj):
+
+        # work out move required to get to our king...
+        our_king = tmp_move_obj.our_team[self._our_king_ref]
+        up = our_king.row - their_piece.row
+        right = our_king.col_no - their_piece.col_no
+
+        # switching teams in the move constructor args to simulate their move...
+        theoretical_move = Move(their_piece, up, right, tmp_move_obj.occupied,
+                                our_team=tmp_move_obj.their_team,
+                                their_team=tmp_move_obj.our_team,
+                                theoretical_move=True, stop_recursion=True)
+
+        if theoretical_move.possible:
+            # we can't make this move as it would put us in check...
+            self._is_valid = False
+            self._invalid_reason = invalid_msg['king'].format(their_piece.name,
+                                                              theoretical_move.cell_ref)
+            return
+        del theoretical_move
+
+
+    @property
+    def _our_king_ref(self):
+        return 'wK' if self._team == 'white' else 'bK'
