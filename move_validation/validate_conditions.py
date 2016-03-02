@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from move_validation.base_move_validation_step import BaseMoveValidationStep, utils
-from literals import INVALID_MOVE_MESSAGES as invalid_msg, DEFAULT_START_POSITIONS
+from move_validation.base_move_validation_step import BaseMoveValidationStep, utils, INVALID_MSG
+from literals import DEFAULT_START_POSITIONS
 
 
 class ValidateConditions(BaseMoveValidationStep):
@@ -26,7 +26,7 @@ class ValidateConditions(BaseMoveValidationStep):
                     self._is_valid = True
                     return
                 else:
-                    self._invalid_reason = invalid_msg["cond_{0}".format(condition)]
+                    self._invalid_reason = INVALID_MSG["cond_{0}".format(condition)]
                     self._is_valid = False
 
             else:
@@ -56,7 +56,7 @@ class ValidateConditions(BaseMoveValidationStep):
     @property
     def _en_passant_applies(self):
 
-        #set up
+        # set up
         target_pos = self.move_obj.piece.get_offset_pos(0, self.move_obj.right)
         target_piece = None
         for ref, piece in self.move_obj.their_team.items():

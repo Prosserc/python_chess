@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-from move_validation.base_move_validation_step import BaseMoveValidationStep
-from literals import INVALID_MOVE_MESSAGES as invalid_msg
+from move_validation.base_move_validation_step import BaseMoveValidationStep, INVALID_MSG
 from utils import pos_to_cell_ref
 
 
@@ -43,12 +42,12 @@ class ValidatePath(BaseMoveValidationStep):
                     final_step = (tmp_pos == move_obj.new_pos)
                     # if it's not the final position or they are in our team block
                     if (not final_step) or (tmp_pos in move_obj.our_team_cells):
-                        self._invalid_reason = invalid_msg['path_gen'].format(
+                        self._invalid_reason = INVALID_MSG['path_gen'].format(
                             pos_to_cell_ref(tmp_pos))
                         return
                     # also block if it is pawn going straight forward
                     elif (move_obj.piece.name == 'pawn') and (move_obj.right == 0):
-                        self._invalid_reason = invalid_msg['path_pawn']
+                        self._invalid_reason = INVALID_MSG['path_pawn']
                         return
                     # if on final step and above two don't apply then you can take
                     elif tmp_pos == move_obj.new_pos:
@@ -61,7 +60,7 @@ class ValidatePath(BaseMoveValidationStep):
         # allow for knights
         else:
             if move_obj.new_pos in move_obj.our_team_cells:
-                self._invalid_reason = invalid_msg['path_knight'].format(move_obj.new_cell_ref)
+                self._invalid_reason = INVALID_MSG['path_knight'].format(move_obj.new_cell_ref)
                 return
             elif move_obj.new_pos in move_obj.their_team_cells:
                 move_obj.take = True

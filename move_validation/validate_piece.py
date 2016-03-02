@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-from move_validation.base_move_validation_step import BaseMoveValidationStep
-from literals import INVALID_MOVE_MESSAGES as invalid_msg
+from move_validation.base_move_validation_step import BaseMoveValidationStep, INVALID_MSG
 
 
 class ValidatePiece(BaseMoveValidationStep):
@@ -17,4 +16,4 @@ class ValidatePiece(BaseMoveValidationStep):
         if self.move_obj.move in [move[:2] for move in self.move_obj.piece.valid_moves]:
             self._is_valid = True
         else:
-            self._invalid_reason = invalid_msg['piece']
+            self._invalid_reason = INVALID_MSG['piece']

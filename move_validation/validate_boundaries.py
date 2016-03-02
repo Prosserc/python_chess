@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-from move_validation.base_move_validation_step import BaseMoveValidationStep
-from literals import INVALID_MOVE_MESSAGES as invalid_msg
+from move_validation.base_move_validation_step import BaseMoveValidationStep, INVALID_MSG
 
 
 class ValidateBoundaries(BaseMoveValidationStep):
@@ -13,4 +12,4 @@ class ValidateBoundaries(BaseMoveValidationStep):
         if self.move_obj.new_row in range(1, 9) and self.move_obj.new_col_no in range(1, 9):
             self._is_valid = True
         else:
-            self._invalid_reason = invalid_msg['boundaries'].format(self.move_obj.new_cell_ref)
+            self._invalid_reason = INVALID_MSG['boundaries'].format(self.move_obj.new_cell_ref)
