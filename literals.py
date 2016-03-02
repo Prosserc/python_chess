@@ -44,3 +44,4 @@ INVALID_MOVE_MESSAGES = {
     "cond_en_passant": "\n".join(ep_conditions),
     "king": "Move not allowed as it would leave your king in check with the {0} in cell {1}"
 }
+
