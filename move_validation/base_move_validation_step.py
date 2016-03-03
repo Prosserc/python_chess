@@ -5,7 +5,8 @@ Base class for all move validation checks.
 from abc import ABCMeta, abstractmethod
 import utils
 from move import Move
-from literals import INVALID_MOVE_MESSAGES as INVALID_MSG
+# noinspection PyUnresolvedReferences
+from literals import INVALID_MOVE_MESSAGES as INVALID_MSG  # used in derived classes
 
 
 class BaseMoveValidationStep(metaclass=ABCMeta):
