@@ -1,0 +1,45 @@
+/* site.css */
+body {
+  background:rgba(0,0,0,0.92);
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+p {
+ color:rgba(255,255,255,0.5)
+}
+
+h2 {
+  color: rgba(50,200,50,0.5);
+}
+
+h4 {
+  color: rgba(200,200,50,0.5);
+}
+
+.console {
+  background:rgba(0,0,0,0.8);
+  border: 3px groove #ccc;
+  color: #ddd;
+  display: block;
+  padding: 5px;
+  width: 600px;
+  font-family: monospace;
+  font-size: medium
+}
+
+.simple-form input[type=text] {
+  background:rgba(255,255,255,0.8);
+  width: 175px;
+  float: left;
+  padding: 2px;
+  margin: 0px;
+}
+
+.simple-form button {
+  margin: 0px 5px;
+  padding: 2px;
+  color: rgba(255,0,0,0.8);
+  font-weight: 500;
+  min-width: 60px;
+}
