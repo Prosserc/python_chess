@@ -45,3 +45,8 @@ INVALID_MOVE_MESSAGES = {
     "king": "Move not allowed as it would leave your king in check with the {0} in cell {1}"
 }
 
+PIECE_VALUES = {'king': float("inf"), 'queen': 9, 'rook': 5, 'bishop': 3.5,
+              'knight': 3.2, 'pawn': 1}
+CHECK_POINTS = 0.1
+CHECKMATE_POINTS = float("inf")
+

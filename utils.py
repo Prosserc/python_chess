@@ -31,7 +31,7 @@ class DebugLevel(Enum):
 LOG_FILE_PATH = 'log.json'
 ASCII_OFFSET = 64  # used to convert numbers to ascii letter codes
 WRONG_ENTRY_POINT_MSG = "This module is not intended to be the main entry point for the" + \
-                        "program, call python_chess.game to start a new game."
+                        "program, run api.py to start a new game"
 current_debug_level = DebugLevel.none
 
 

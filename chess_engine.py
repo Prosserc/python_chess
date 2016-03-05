@@ -1,90 +1,147 @@
 #!/usr/bin/env python3
 """
-Unit test for chess.py - an automated game. As AI is not yet built
-these will be purely random moves with no intelligence, but will serve
-as a good test it will cover a broad array of pieces / moves.
+Module to decide move to make for computer player
 """
-# from game import Game
-from utils import WRONG_ENTRY_POINT_MSG
 from random import random as rnd
-from copy import deepcopy
-
-PIECE_VALS = {'queen': 9, 'rook': 5, 'bishop': 3.5,
-              'knight': 3.2, 'pawn': 1, 'check': 3, 'checkmate': 1000}
+from inspect import stack
+from literals import PIECE_VALUES, CHECK_POINTS, CHECKMATE_POINTS
 
 
-def __pick_rnd(lst, cnt=None):
+class AI(object):
     """
-    Returns a random item from a list.
+    Decide on moves for computer opponent
     """
-    if not cnt:
-        cnt = len(lst)
-    i = int(rnd() * (cnt - 1))  # -1 needed to allow for zero based indexing
-    return lst[i]
 
 
-def __random_move(game, team):
-    """
-    Level 0 - Select a move randomly from all possible moves.
-    """
-    move_dict, cnt = game.get_all_possible_moves(team=team)
-    obj_list = []
-    for piece_ref, moves in move_dict.items():
-        for move_obj in moves:
-            obj_list.append(move_obj)
-    return __pick_rnd(obj_list, cnt)
+    def get_points(self, game, move_obj):
+        take_ref = game.board.positions[move_obj.new_row][move_obj.new_col]
+        points = PIECE_VALUES[game.pieces[take_ref].name]
+        if move_obj.checkmate:
+            points += CHECKMATE_POINTS
+        elif move_obj.check:
+            points += CHECK_POINTS
+        return points
 
 
-def __game_state(game, team):
-    """
-    Asses the values of pieces on the current team relative to the
-    the value of pieces on the other team.
-    """
-    pass  # to follow
+    def pick_rnd(self, lst, cnt=None):
+        """Returns a random item from a list."""
+        if not cnt:
+            cnt = len(lst)
+        i = int(rnd() * (cnt - 1))  # -1 needed to allow for zero based indexing
+        return lst[i]
 
 
-def __next_move(game_branch, team):
-    """
-    Find all possible moves, select one resulting in the
-    best take available (if one is available).
-    """
-    raise Exception("Not implemented yet")
-    # obj_list.append(move_obj)
-    # if move_obj.take:
-    #     take_ref = \
-    #        game_branch.board.positions[move_obj.new_row][move_obj.new_col]
-    #     points = piece_vals[game_branch.pieces[take_ref].name]
-    #     if points > max_points:
-    #         max_points, selected_move = points, move_obj
+    def random_move(self, game, team):
+        """Level 0 - Select a move randomly from all possible moves."""
+        state = "ready"
+        func_name = stack()[0][3]
+        if state.find("ready") != 0:
+            raise Exception("{0} state {1}".format(func_name, state))
 
-    # if max_points == 0:
-    #     selected_move = __pick_rnd(obj_list, cnt)
-    # return selected_move
-
-
-def pick_move(game, team, level):
-    """
-    Create a data structure representing the state of the game for
-    each branch of moves (a game object) with a points score for the 
-    branch. Points should be added for the best selectable move for 
-    your team and taken off for the best possible opponents move.
-    """
-    if level == 0:
-        return __random_move(game, team)
-    max_points, obj_list = 0, []
-
-    for l in range(1, level+1):
-        if l == 1:
-            branch = deepcopy(game)
-        
-        move_dict, cnt = branch.get_all_possible_moves(team=team)
+        move_dict, cnt = game.get_all_possible_moves(team=team)
+        obj_list = []
         for piece_ref, moves in move_dict.items():
             for move_obj in moves:
-                ##
-                pass
-
-        move_branches = {}
+                obj_list.append(move_obj)
+        return self.pick_rnd(obj_list, cnt)
 
 
-if __name__ == '__main__':
-    print(WRONG_ENTRY_POINT_MSG)
+    def level1_move(self, game, team):
+        """Level 1 - Find all possible moves, select one resulting in the
+        best take available (if one is available)."""
+        state = "ready - I think"
+        func_name = stack()[0][3]
+        if state.find("ready") != 0:
+            raise Exception("{0} state {1}".format(func_name, state))
+
+        move_dict, cnt = game.get_all_possible_moves(team=team)
+        max_points, possible_moves, selected_move = 0, [], None
+        for piece_ref, moves in move_dict.items():
+            for move_obj in moves:
+                possible_moves.append(move_obj)
+                if move_obj.take:
+                    points = self.get_points(game, move_obj)
+                    if points > max_points:
+                        max_points, selected_move = points, move_obj
+
+        if not selected_move:
+            selected_move = self.pick_rnd(possible_moves, cnt)
+        return selected_move
+
+
+    def level2_move(self, game, team):
+        """Level 2 - Find all possible moves, and all possible responses,
+        score by value of pieces taken (minus any taken from yours),
+        select one resulting in the best points."""
+        # TO FOLLOW
+        # re-write at some point as generic function to look any number of levels...
+        state = "ready for tests - probably not working"
+        func_name = stack()[0][3]
+        if state.find("ready") != 0:
+            raise Exception("{0} state {1}".format(func_name, state))
+
+        move_dict, cnt = game.get_all_possible_moves(team=team)
+        max_points, possible_moves, selected_move = 0, [], None
+        for piece_ref, moves in move_dict.items():
+            for move_obj in moves:
+                points = 0
+                possible_moves.append(move_obj)
+                if move_obj.take:
+                    take_ref = game.board.positions[move_obj.new_row][move_obj.new_col]
+                    points += PIECE_VALUES[game.pieces[take_ref].name]
+                resp_moves, cnt2 = game.get_all_possible_moves(team=('white' if team == 'black' else 'black'))
+                for their_piece_ref, their_moves in resp_moves.items():
+                    for their_mv_obj in their_moves:
+                        if their_mv_obj.take:
+                            if their_mv_obj.take:
+                                their_take_ref = \
+                                    game.board.positions[their_mv_obj.new_row][their_mv_obj.new_col]
+                                points -= PIECE_VALUES[game.pieces[their_take_ref].name]
+                        if points > max_points:
+                            max_points, selected_move = points, move_obj
+
+        if not selected_move:
+            selected_move = self.pick_rnd(possible_moves, cnt)
+        return selected_move
+
+
+    def level3_move(self, game, team):
+        """Level 3 - Find all possible moves to 3 turns score by value of
+        pieces taken (minus any taken from yours), select one resulting in
+        the best points."""
+        # TO FOLLOW
+        # rewrite at some point as generic function to look any number of levels...
+        state = "definitely not working"
+        func_name = stack()[0][3]
+        if state.find("ready") != 0:
+            raise Exception("{0} state {1}".format(func_name, state))
+
+        move_dict, cnt = game.get_all_possible_moves(team=team)
+        max_points, possible_moves, selected_move = 0, [], None
+        for piece_ref, possible_moves in move_dict.items():
+            for move_obj in possible_moves:
+                points = 0
+                possible_moves.append(move_obj)
+                if move_obj.take:
+                    take_ref = \
+                        game.board.positions[move_obj.new_row][move_obj.new_col]
+                    points += PIECE_VALUES[game.pieces[take_ref].name]
+                resp_moves, cnt2 = game.get_all_possible_moves(team=('white' if team == 'black' else 'black'))
+                for mv2_pref, mv2_lst in resp_moves.items():
+                    for mv2_obj in mv2_lst:
+                        if mv2_obj.take:
+                            mv2_take_ref = \
+                                game.board.positions[mv2_obj.new_row][mv2_obj.new_col]
+                            points -= PIECE_VALUES[game.pieces[mv2_take_ref].name]
+                        for mv3_pref, mv3_lst in resp_moves.items():
+                            for mv3_obj in mv3_lst:
+                                if mv3_obj.take:
+                                    mv3_take_ref = \
+                                        game.board.positions[mv3_obj.new_row][mv3_obj.new_col]
+                                    points -= PIECE_VALUES[game.pieces[mv3_take_ref].name]
+                            if points > max_points:
+                                max_points, selected_move = points, move_obj
+
+        if not selected_move:
+            selected_move = self.pick_rnd(possible_moves, cnt)
+        return selected_move

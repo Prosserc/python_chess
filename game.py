@@ -6,9 +6,10 @@ import json
 from board import Board
 from piece import Piece
 from move import Move
-from literals import PIECE_CODES, DEFAULT_START_POSITIONS, TEAMS, LOGGING, MOVE_INSTRUCTIONS
+from literals import PIECE_CODES, DEFAULT_START_POSITIONS, TEAMS, LOGGING
 # from chess_engine import pick_move
-from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, debug, DebugLevel, set_debugging_level
+from utils import shout, write_log, cell_ref_to_pos, pos_to_cell_ref, debug, DebugLevel, \
+    set_debugging_level
 from copy import deepcopy
 
 LOG = ''
@@ -57,6 +58,7 @@ class Game(object):
         Output entire object contents as json.
         """
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
 
     @staticmethod
     def __create_pieces(move_dict, start_pos):
@@ -403,26 +405,9 @@ class Game(object):
             return None
 
 
-def main():
-    """
-    Main entry point for program
-    """
-    game = Game()  # create game object as new instance of Game class
-
-    # add set up func for 1/2 player options etc
-    print(MOVE_INSTRUCTIONS)
-    # _ = input('\nPress enter to continue...')
-
-    while not game.checkmate:
-        game.take_turn('white')
-        game.take_turn('black')
-
-    # pause         
-    _ = input('\nPress enter to quit')
-
-
 if __name__ == '__main__':
-    main()
+    import api
+    api.main()
 
 
     #  N O T E S :
