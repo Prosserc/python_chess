@@ -88,7 +88,7 @@ class Game(object):
         return pieces
 
 
-    def take_turn(self, team, prompt=None, move=None):
+    def take_turn(self, team=None, prompt=None, move=None):
         """
         Interact with player to facilitate moves, capture data and
         identify/store information common to all potential moves.
@@ -99,11 +99,11 @@ class Game(object):
         global LOG
 
         self.turns += 1
-        self.current_team = team
+        self.current_team = team or 'black' if self.current_team == 'white' else 'white'
         occupied, our_team, their_team = self.get_occupied()
         validated, found_issue = False, False
         if self.check:
-            user_feedback = shout(team + ' team in check',
+            user_feedback = shout('{0} team in check'.format(self.current_team),
                                   print_output=False, return_output=True)
         else:
             user_feedback = None
