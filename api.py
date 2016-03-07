@@ -6,6 +6,7 @@ from chess_engine import AI
 
 game = None
 
+
 def start_game():
     return Game()
 
@@ -31,36 +32,41 @@ def main(no_of_players=None, ai_player_level_array=None):
         while not no_of_players:
             try:
                 no_of_players = int(input("\nWould you like to play with 1 player or 2: "))
-                assert(no_of_players <= 2 and no_of_players >= 0)
+                assert(2 >= no_of_players >= 0)
             except (ValueError, AssertionError):
-                print("Please enter just a number 1 or 2")
+                print("Please enter just a number 1 or 2...")
 
 
     players = []
-    #create players
-    for ai_player_no in range(2):
+    # create players
+    for player_no in range(2):
+        team = 'white' if player_no == 0 else 'black'
 
         # create object for human player if needed...
         if len([p for p in players if p.player_type == PlayerType.human]) < no_of_players:
-            players.append(Player(PlayerType.human, game.take_turn()))
+            player = Player(PlayerType.human, team, game)
+            players.append(player)
+            continue
 
         # else create AI player...
         ai_level = None
         if ai_player_level_array:
-            ai_level = int(ai_player_level_array[ai_player_no])
+            ai_level = int(ai_player_level_array[player_no])
         while not ai_level:
             try:
-                ai_level = int(input("\nPlease chose a difficulty level between 1 and 3"))
-                assert(ai_level >= 1 and ai_level <= 3)
+                ai_level = int(input("\nPlease chose a difficulty level between 1 and 3: "))
+                assert(1 <= ai_level <= 3)
             except(ValueError, AssertionError):
-                print("Please enter just a number between 1 and 3")
+                print("Please enter just a number between 1 and 3...")
 
         ai = AI()
         level_function = {1: ai.random_move,
                           2: ai.level1_move,
                           3: ai.level2_move,
                           4: ai.level3_move}
-        players.append(Player(PlayerType.ai, level_function[ai_level]))
+        func_to_get_move = level_function[ai_level]
+        player = Player(PlayerType.ai, team, game, pre_move_func=func_to_get_move)
+        players.append(player)
 
     print(MOVE_INSTRUCTIONS)
 

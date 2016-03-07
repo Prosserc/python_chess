@@ -118,7 +118,7 @@ class Game(object):
                     print(self.board.draw_board())
                     if user_feedback:
                         print(user_feedback + '\n')
-                    prompt = input("[" + team + " move] >> ")
+                    prompt = input("[{0} move] >> ".format(self.current_team))
 
                 piece, up, right, hold_move, user_feedback = \
                     self.__parse_prompt(prompt, our_team)
