@@ -51,7 +51,9 @@ def main(no_of_players=None, ai_player_level_array=None):
         # else create AI player...
         ai_level = None
         if ai_player_level_array:
-            ai_level = int(ai_player_level_array[player_no])
+            number_of_human_players = len([p for p in players
+                                           if p.player_type == PlayerType.human])
+            ai_level = int(ai_player_level_array[player_no - number_of_human_players])
         while not ai_level:
             try:
                 ai_level = int(input("\nPlease chose a difficulty level between 1 and 3: "))

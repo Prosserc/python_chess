@@ -2,6 +2,7 @@
 import unittest
 from game import Game
 
+
 class TestGame(unittest.TestCase):
 
 
@@ -14,7 +15,7 @@ class TestGame(unittest.TestCase):
         del self.game
 
 
-    def test_full_game(self):
+    def test_full_game_two_player(self):
         self.helper_setup_checkmate()
         self.assertTrue(self.game.checkmate)
         self.assertTrue(self.game.current_team, "white")
@@ -22,7 +23,7 @@ class TestGame(unittest.TestCase):
 
     def test_list_moves_for_pawn_first_move(self):
         ref = 'wp2'
-        pieces = { ref: self.game.get_piece(ref) }
+        pieces = {ref: self.game.get_piece(ref)}
         print("\nGetting all possible moves ({0}) from pawns 1st move...".format(ref))
         moves, _ = self.game.get_all_possible_moves(pieces=pieces, list_moves=True, team='white')
         expected_refs = ['B3', 'B4']
@@ -34,7 +35,7 @@ class TestGame(unittest.TestCase):
         self.game.take_turn('white', 'a2a4')
         self.game.take_turn('black', 'e7e5')
         ref = 'wp1'
-        pieces = { ref: self.game.get_piece(ref) }
+        pieces = {ref: self.game.get_piece(ref)}
         print("\nGetting all possible moves ({0}) from pawns 2nd move...".format(ref))
         moves, _ = self.game.get_all_possible_moves(pieces=pieces, list_moves=True, team='white')
 
