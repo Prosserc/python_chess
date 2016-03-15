@@ -192,7 +192,7 @@ class Game(object):
         try:
             current_cell_ref = prompt[:2]
             [cur_row, cur_col_no] = cell_ref_to_pos(current_cell_ref)
-            assert(cur_row in range(1,9) and cur_col_no in range(1,9))
+            assert(cur_row in range(1, 9) and cur_col_no in range(1, 9))
         except (IndexError, ValueError, AssertionError):
             user_feedback = ('A valid cell for your current position could not be found\n' +
                 '(using the first two characters from your entry: "{0}")').format(prompt)

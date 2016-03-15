@@ -25,7 +25,7 @@ class Player(object):
 
 
     def take_move(self):
-        move=None
+        move = None
         if self.pre_move_func:
             move = self.pre_move_func(self.game, self.team)
         self.move_func(team=self.team, move=move)
