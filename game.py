@@ -99,7 +99,7 @@ class Game(object):
         global LOG
 
         self.turns += 1
-        self.current_team = team or 'black' if self.current_team == 'white' else 'white'
+        self.current_team = team
         occupied, our_team, their_team = self.get_occupied()
         validated, found_issue = False, False
         if self.check:
@@ -110,14 +110,17 @@ class Game(object):
 
         # repeat prompt until a valid move is given...
         while not validated:
+            if not prompt:
+                print(self.board.draw_board())
+
             # skip set up if a move object is passed in...
             if move:
                 piece, up, right = move.piece, move.up, move.right
             else:
+                if user_feedback:
+                    print(user_feedback + '\n')
+
                 if not prompt:
-                    print(self.board.draw_board())
-                    if user_feedback:
-                        print(user_feedback + '\n')
                     prompt = input("[{0} move] >> ".format(self.current_team))
 
                 piece, up, right, hold_move, user_feedback = \
