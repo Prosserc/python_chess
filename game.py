@@ -88,7 +88,7 @@ class Game(object):
         return pieces
 
 
-    def take_turn(self, team=None, prompt=None, move=None):
+    def take_turn(self, team, prompt=None, move=None):
         """
         Interact with player to facilitate moves, capture data and
         identify/store information common to all potential moves.
@@ -110,8 +110,6 @@ class Game(object):
 
         # repeat prompt until a valid move is given...
         while not validated:
-            if not prompt:
-                print(self.board.draw_board())
 
             # skip set up if a move object is passed in...
             if move:
@@ -276,6 +274,7 @@ class Game(object):
 
         # update board
         self.board.update_board(move.pos, move.new_pos, piece.ref)
+        print(self.board.draw_board())
 
         assert our_team[piece.ref].pos == piece.pos  # todo -replace with unit test
         if move.take:

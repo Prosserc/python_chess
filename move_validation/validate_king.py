@@ -6,19 +6,19 @@ from copy import deepcopy
 
 class ValidateKing(BaseMoveValidationStep):
     """
-    Check if a move would put your king in check
+    Check if a move would leave the player's king in check
     """
 
 
     def perform_check(self):
         self._is_valid = True
 
+        # define base case as the move object is created recursively below
+        if self.move_obj.stop_recursion:
+            return
+
         # need to temporarily update move to see if it puts king in danger. Updating a tmp copy
         tmp_move_obj = deepcopy(self.move_obj)
-
-        # define base case as the move object is created recursively below
-        if tmp_move_obj.stop_recursion:
-            return
 
         # reflect move in position
         tmp_move_obj.piece.row = self.move_obj.new_row
@@ -39,7 +39,7 @@ class ValidateKing(BaseMoveValidationStep):
 
         # iterate through dictionary of their pieces creating theoretical moves
         # attempting to take king, if possible then move would put you in check.
-        for ref, their_piece in tmp_move_obj.their_team.items():
+        for _, their_piece in tmp_move_obj.their_team.items():
             self._create_theoretical_move(their_piece, tmp_move_obj)
 
 

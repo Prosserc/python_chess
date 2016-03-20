@@ -71,6 +71,7 @@ def main(no_of_players=None, ai_player_level_array=None):
         players.append(player)
 
     print(MOVE_INSTRUCTIONS)
+    print(game.board.draw_board())
 
     while True:
         for player in players:
