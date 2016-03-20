@@ -75,7 +75,7 @@ def main(no_of_players=None, ai_player_level_array=None):
 
     while True:
         for player in players:
-            if not game.checkmate:
+            if not game.checkmate and not game.draw:
                 player.take_move()
             else:
                 break

@@ -102,11 +102,7 @@ class Game(object):
         self.current_team = team
         occupied, our_team, their_team = self.get_occupied()
         validated, found_issue = False, False
-        if self.check:
-            user_feedback = shout('{0} team in check'.format(self.current_team),
-                                  print_output=False, return_output=True)
-        else:
-            user_feedback = None
+        user_feedback = None
 
         # repeat prompt until a valid move is given...
         while not validated:
@@ -147,6 +143,7 @@ class Game(object):
         # wrap up if done...
         if self.checkmate or self.turns >= 200:
             if self.turns >= self.turn_limit:
+                self.draw = True
                 shout('{0} moves, lets call it a draw'.format(self.turns))
             elif self.checkmate:
                 move.checkmate = True
@@ -291,6 +288,7 @@ class Game(object):
             # other player in checkmate?
             self.checkmate = self.__in_checkmate(occupied, our_team, their_team)
 
+        # last piece needed for en_passant rule
         last_piece = self.get_piece(self.last_piece_to_move)
         if last_piece:
             last_piece.last_to_move = False

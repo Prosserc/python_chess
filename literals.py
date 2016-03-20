@@ -49,4 +49,3 @@ PIECE_VALUES = {'king': float("inf"), 'queen': 9, 'rook': 5, 'bishop': 3.5,
               'knight': 3.2, 'pawn': 1}
 CHECK_POINTS = 0.1
 CHECKMATE_POINTS = float("inf")
-
