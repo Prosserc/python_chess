@@ -8,6 +8,7 @@ class PotentialMove(object):
     def __init__(self, move_obj):
         self.move_obj = move_obj
         self.score = self.get_score
+        self.next_potential_move_tree = None
 
 
     def get_score(self, game):
@@ -30,7 +31,7 @@ class PotentialMove(object):
 class PotentialMoveTree(object):
 
 
-    def __init__(self, game, team, level):
+    def __init__(self, game, team, current_level, no_of_levels):
         self.game = game
         self.team = team
         self.level = level
