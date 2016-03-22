@@ -3,7 +3,7 @@
 Module to decide move to make for computer player
 """
 from random import random as rnd
-from inspect import stack
+from inspect import stack # todo - get rid of this if poss
 from literals import PIECE_VALUES, CHECK_POINTS, CHECKMATE_POINTS
 
 
