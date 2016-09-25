@@ -6,6 +6,8 @@ RED="${SWITCH}1;31m"
 GREEN="${SWITCH}1;32m"
 
 printf "\nrunning unit tests...\n"
+
+# run with python 3 if possible otherwise fall back to default python
 python3 -m unittest discover -v -s ./unit_tests || python -m unittest discover -v -s ./unit_tests
 if [ $? -eq 0 ]; then
     printf "\n${GREEN}unit tests passed${NORMAL}\n"
